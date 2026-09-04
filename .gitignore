@@ -7,3 +7,5 @@ archive-react-build/dist
 .env*
 node_modules
 tmp
+.next
+next-env.d.ts

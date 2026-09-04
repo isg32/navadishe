@@ -1,20 +1,22 @@
 # Nava Dishe — Setup
 
-A public site (`index.html`) plus a login-gated internal **dashboard** (`dashboard.html`) for News First staff. **Neon Postgres is the source of truth** for both forms; Google Sheets is an optional, admin-triggered export ("Sync to Sheets" in the dashboard), not written on every submission.
+A **Next.js** (App Router) app: the public site plus a login-gated internal **dashboard** for News First staff. **Neon Postgres is the source of truth** for both forms; Google Sheets is an optional, admin-triggered export ("Sync to Sheets" in the dashboard), not written on every submission.
 
-- `index.html` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback" → `website_leads` table.
-- `dashboard.html` — staff-only, behind real login (`app_users` table, not an env-var dictionary). A sidebar (drawer + hamburger on mobile) with:
+- `/` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback" → `website_leads` table.
+- `/dashboard` — staff-only, behind real login (`app_users` table, not an env-var dictionary). A sidebar (drawer + hamburger on mobile) with:
   - **Home** — an analytics screen: totals, board/district breakdowns, recent activity. Scoped to what the signed-in user is allowed to see.
   - **New Registration** — the full Disha-style form → `school_registrations` table.
   - **Registrations** / **From Website** — searchable, sortable, filterable tables over the two Postgres tables.
   - **Users** (admin only) — create logins, set roles and district access.
   - **Sync to Sheets** (admin only) — pushes the current Postgres data into the Google Sheet.
 
-Nothing secret ever reaches the browser — the Neon connection string, Apps Script URL, and session-signing secret are all read server-side by Vercel Edge Functions from environment variables.
+Nothing secret ever reaches the browser — the Neon connection string, Apps Script URL, and session-signing secret are all read server-side (Route Handlers under `app/api/*`, and `proxy.js` for the dashboard's auth gate) from environment variables.
+
+The previous plain-HTML implementation (static `index.html`/`dashboard.html`, vanilla JS, Vercel Edge Functions under `api/`) is preserved under `archive-static-html/` for reference — this rewrite ports it 1:1 in content and design, just as React components.
 
 ## 1. Roles
 
-Set on each row in `app_users`, enforced both server-side (every `api/*.js`) and in the sidebar:
+Set on each row in `app_users`, enforced both server-side (every `app/api/*/route.js`, plus `proxy.js` blocking page access) and in the sidebar:
 
 | Role | Can do |
 |---|---|
@@ -38,18 +40,11 @@ Manage users from the dashboard's **Users** page (admin-only), or via `node db/c
 cp .env.example .env.local
 # fill in real values, then:
 node db/migrate.js   # creates the schema, seeds an admin from DASHBOARD_USERS
-vercel dev
+npm install
+npm run dev
 ```
 
-**Important for `vercel dev`:** a plain `.env.local` is *not* enough for the Edge Functions under local dev — Vercel's local Edge runtime only sees variables actually registered for the `development` environment, not arbitrary `.env.local` contents. Register each one once:
-
-```bash
-for var in NEON_URL SESSION_SECRET APPS_SCRIPT_URL SHEET_READ_KEY DASHBOARD_USERS; do
-  grep "^$var=" .env.local | cut -d= -f2- | vercel env add "$var" development
-done
-```
-
-(In the real Vercel deployment, add the same variables for Production/Preview the normal way — Project Settings → Environment Variables.)
+Next.js reads `.env.local` natively — no extra registration step needed for local dev (unlike the old Vercel-Edge-Function setup, where `vercel dev` only saw variables registered per-environment via `vercel env add`). In the real Vercel deployment, add the same five variables in Project Settings → Environment Variables (Production/Preview).
 
 `.env.local` is git-ignored — never commit it.
 
@@ -63,7 +58,7 @@ node db/migrate.js
 
 It's idempotent (`create table if not exists`), safe to re-run any time you pull schema changes.
 
-> **Neon Auth note:** this Neon project already has Neon's managed-auth schema provisioned (`neon_auth.*`, visible via the Neon console's Auth tab) — but that's Neon's own *hosted* auth service, requiring a `NEON_AUTH_BASE_URL` and a cookie secret from Console → Auth → Configuration that weren't available when this was built. The roles system above uses a plain `app_users` table with its own PBKDF2 password hashing and the same signed-cookie session mechanism as before — genuinely real accounts, stored in the same Neon database, just not Neon's specific hosted product. Swapping to the managed service later is a contained change (only `api/login.js`/`api/_session.js`), not a rewrite of the roles/permissions logic.
+> **Neon Auth note:** this Neon project already has Neon's managed-auth schema provisioned (`neon_auth.*`, visible via the Neon console's Auth tab) — but that's Neon's own *hosted* auth service, requiring a `NEON_AUTH_BASE_URL` and a cookie secret from Console → Auth → Configuration that weren't available when this was built. The roles system above uses a plain `app_users` table with its own PBKDF2 password hashing and the same signed-cookie session mechanism as before — genuinely real accounts, stored in the same Neon database, just not Neon's specific hosted product. Swapping to the managed service later only touches `lib/session.js`/`app/api/login/route.js`, not the roles/permissions logic.
 
 ## 4. Connect "Sync to Sheets" to Google Sheets
 
@@ -84,37 +79,60 @@ Whenever you edit `Code.gs`, redeploy it (Deploy → Manage deployments → Edit
 
 1. Push this project to a Git repo and import it into Vercel (or run `vercel` from this directory).
 2. Add the environment variables from §2 in Project Settings → Environment Variables (Production/Preview).
-3. Deploy. Vercel auto-detects the static files and everything under `api/` as Edge Functions — no build command or `vercel.json` needed.
+3. Deploy. Vercel auto-detects Next.js from `package.json`/`next.config.js` — no extra config needed.
 4. Run `node db/migrate.js` once (pointed at the same `NEON_URL`) to set up the schema and your first admin.
 
-`dashboard.html` isn't linked from the public site and carries `<meta name="robots" content="noindex, nofollow">` — share its URL with staff directly.
+`/dashboard/*` isn't linked from the public site and carries `robots: {index: false}` metadata — share its URL with staff directly.
 
 ## 6. Project structure
 
 ```
-index.html                The public site
-dashboard.html             Staff dashboard — sidebar shell, all panels
-css/styles.css              Shared styling (brand tokens, layout, responsive rules)
-css/dashboard.css           Dashboard-only styling (sidebar, stat cards, tables, users)
-js/main.js                   Mobile menu, scroll-reveal, public quick-lead form submit
-js/dashboard.js              Auth/session, sidebar nav, Home analytics, tables, Users, Sync
-api/register.js              Writes a submission to Postgres (website_leads or school_registrations)
-api/leads.js                 Session+role+district-gated reader for either Postgres table
-api/analytics.js             Session+role+district-gated aggregates for the Home page
-api/login.js                 Checks app_users (Postgres), issues a signed session cookie
-api/logout.js                Clears the session cookie
-api/whoami.js                Lets dashboard.html check for an existing session on load
-api/users.js                 Admin-only CRUD over app_users
-api/sync-sheets.js            Admin-only: pushes Postgres data into Google Sheets
-api/_session.js               Shared HMAC session-signing helpers
-api/_auth.js                  Password hashing (PBKDF2) + ROLE_NAV permissions table
-api/_db.js                    Shared Neon connection helper
-db/schema.sql                 Table definitions
-db/migrate.js                 Applies schema.sql, seeds a first admin from DASHBOARD_USERS
-db/create-user.js             CLI to create/update a dashboard user
-images/                       01_NavaDishe_emblem_icon.png (site logo/favicon), 02_News1st_logo.png (partner), stock photography
-apps-script/Code.gs            Google Apps Script source — paste into script.google.com
-.env.example                   Template for the local .env.local (git-ignored)
+app/layout.jsx                  Root layout — fonts (next/font), global <head> metadata/SEO/OG
+app/page.jsx                    The public site — assembles components/site/*
+app/globals.css                  Site-wide styling (brand tokens, layout, responsive rules)
+components/site/                 One component per section (Hero, About, Eligibility, ...);
+                                  Masthead and RegisterForm are 'use client' (interactive)
+
+app/dashboard/layout.jsx         Shared by /dashboard/login and the shell — just the CSS import
+app/dashboard/dashboard.css       Dashboard-only styling (sidebar, stat cards, tables, users)
+app/dashboard/login/page.jsx      Login page
+app/dashboard/(shell)/layout.jsx  Sidebar + topbar shell (client component: whoami, hamburger)
+app/dashboard/(shell)/page.jsx           Home — analytics
+app/dashboard/(shell)/new/page.jsx       New Registration
+app/dashboard/(shell)/registrations/…    Registrations table
+app/dashboard/(shell)/leads/…            From Website table
+app/dashboard/(shell)/users/…            Users management (admin only)
+app/dashboard/(shell)/sync/…             Sync to Sheets (admin only)
+components/dashboard/             Shared pieces: SessionContext, StatCard, MiniTable,
+                                   DetailOverlay, RegisterForm (the dashboard's full form)
+hooks/useTableState.js            Client-side search/sort/filter, shared by both tables
+
+proxy.js                          Dashboard auth gate (Next 16's "proxy", formerly middleware.js):
+                                   redirects unauthenticated requests, and blocks page access
+                                   by role (belt-and-suspenders on top of every route handler)
+
+app/api/register/route.js         Writes a submission to Postgres (website_leads or school_registrations)
+app/api/leads/route.js            Session+role+district-gated reader for either Postgres table
+app/api/analytics/route.js        Session+role+district-gated aggregates for the Home page
+app/api/login/route.js            Checks app_users (Postgres), issues a signed session cookie
+app/api/logout/route.js           Clears the session cookie
+app/api/whoami/route.js           Lets the dashboard shell check for an existing session on load
+app/api/users/route.js            Admin-only CRUD over app_users
+app/api/sync-sheets/route.js      Admin-only: pushes Postgres data into Google Sheets
+lib/session.js                    Shared HMAC session-signing helpers
+lib/auth.js                       Password hashing (PBKDF2) + ROLE_NAV permissions table
+lib/db.js                         Shared Neon connection helper
+lib/format.js                     formatDate()
+
+db/schema.sql                     Table definitions
+db/migrate.js                     Applies schema.sql, seeds a first admin from DASHBOARD_USERS
+db/create-user.js                 CLI to create/update a dashboard user
+
+public/images/                    01_NavaDishe_emblem_icon.png (site logo/favicon),
+                                   02_News1st_logo.png (partner), stock photography
+apps-script/Code.gs                Google Apps Script source — paste into script.google.com
+.env.example                       Template for the local .env.local (git-ignored)
+archive-static-html/               The previous static-HTML implementation, kept for reference
 ```
 
 ## 7. Image credits

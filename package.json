@@ -1,10 +1,19 @@
 {
   "name": "nava-dishe",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Nava Dishe — public site + staff dashboard, Vercel Edge/Node Functions backed by Neon Postgres.",
+  "description": "Nava Dishe — public site + staff dashboard, Next.js on Vercel, Neon Postgres.",
   "license": "UNLICENSED",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0"
+    "@neondatabase/serverless": "^1.1.0",
+    "next": "^16.3.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }
