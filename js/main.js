@@ -78,6 +78,7 @@ if (form) {
       statusEl.className = 'form-status success';
       statusEl.innerHTML =
         "Thank you! Your school's registration has been received. Our team will reach out shortly.";
+      statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch (err) {
       statusEl.hidden = false;
       statusEl.className = 'form-status error';
