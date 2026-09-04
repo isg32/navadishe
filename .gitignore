@@ -5,3 +5,5 @@
 archive-react-build/node_modules
 archive-react-build/dist
 .env*
+node_modules
+tmp

@@ -38,8 +38,10 @@ async function hmacKey(secret) {
   );
 }
 
-export async function createSessionToken(username, secret, maxAgeSeconds = 8 * 60 * 60) {
-  const payload = JSON.stringify({ u: username, exp: Date.now() + maxAgeSeconds * 1000 });
+// `claims` is { u: username, role, districts } — anything else you add here
+// rides along in the signed, HttpOnly cookie (never readable by client JS).
+export async function createSessionToken(claims, secret, maxAgeSeconds = 8 * 60 * 60) {
+  const payload = JSON.stringify({ ...claims, exp: Date.now() + maxAgeSeconds * 1000 });
   const payloadB64 = toBase64Url(enc.encode(payload));
   const key = await hmacKey(secret);
   const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payloadB64));
@@ -57,7 +59,7 @@ export async function verifySessionToken(token, secret) {
   try {
     const payload = JSON.parse(dec.decode(fromBase64Url(payloadB64)));
     if (!payload.exp || Date.now() > payload.exp) return null;
-    return payload; // { u, exp }
+    return payload; // { u, role, districts, exp }
   } catch {
     return null;
   }

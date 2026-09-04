@@ -1,0 +1,10 @@
+{
+  "name": "nava-dishe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nava Dishe — public site + staff dashboard, Vercel Edge/Node Functions backed by Neon Postgres.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0"
+  }
+}

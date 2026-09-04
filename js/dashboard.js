@@ -1,16 +1,40 @@
+// Mirrors ROLE_NAV in api/_auth.js — keep these two in sync.
+const ROLE_NAV = {
+  admin: ['home', 'form', 'registrations', 'leads', 'users', 'sync'],
+  poc: ['home', 'form'],
+  reader: ['home', 'registrations', 'leads'],
+};
+const PAGE_TITLES = {
+  home: 'Home',
+  form: 'New Registration',
+  registrations: 'Registrations',
+  leads: 'From Website',
+  users: 'Users',
+  sync: 'Sync to Sheets',
+};
+
 // ===== Elements =====
 const loginView = document.getElementById('loginView');
 const dashboardView = document.getElementById('dashboardView');
 const loginForm = document.getElementById('loginForm');
 const loginStatus = document.getElementById('loginStatus');
 const whoamiUser = document.getElementById('whoamiUser');
+const whoamiRole = document.getElementById('whoamiRole');
 const logoutBtn = document.getElementById('logoutBtn');
 
-const tabs = document.querySelectorAll('.dash-tab');
+const sidebar = document.getElementById('sidebar');
+const sidebarScrim = document.getElementById('sidebarScrim');
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const pageTitle = document.getElementById('pageTitle');
+const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
 const panels = {
+  home: document.getElementById('homeTab'),
   form: document.getElementById('formTab'),
   registrations: document.getElementById('registrationsTab'),
   leads: document.getElementById('leadsTab'),
+  users: document.getElementById('usersTab'),
+  sync: document.getElementById('syncTab'),
 };
 
 const registerForm = document.getElementById('registerForm');
@@ -20,7 +44,9 @@ const detailOverlay = document.getElementById('detailOverlay');
 const detailList = document.getElementById('detailList');
 const detailClose = document.getElementById('detailClose');
 
-// ===== Helpers shared by both tables =====
+let currentUser = null;
+
+// ===== Shared helpers =====
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -53,10 +79,19 @@ function showLogin() {
   dashboardView.hidden = true;
 }
 
-function showDashboard(username) {
+function showDashboard(user) {
+  currentUser = user;
   loginView.hidden = true;
   dashboardView.hidden = false;
-  whoamiUser.textContent = username || '';
+  whoamiUser.textContent = user.username || '';
+  whoamiRole.textContent = user.role || '';
+
+  const allowed = ROLE_NAV[user.role] || [];
+  sidebarLinks.forEach((link) => {
+    link.hidden = !allowed.includes(link.dataset.tab);
+  });
+
+  switchTab('home');
 }
 
 async function checkSession() {
@@ -64,7 +99,7 @@ async function checkSession() {
     const res = await fetch('/api/whoami');
     if (res.ok) {
       const data = await res.json();
-      showDashboard(data.username);
+      showDashboard(data);
       return;
     }
   } catch {
@@ -95,7 +130,7 @@ loginForm.addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Invalid username or password');
     }
     loginForm.reset();
-    showDashboard(data.username);
+    showDashboard(data);
   } catch (err) {
     loginStatus.hidden = false;
     loginStatus.textContent = err.message || 'Something went wrong. Please try again.';
@@ -113,21 +148,154 @@ logoutBtn.addEventListener('click', async () => {
   }
   registrationsTable.reset();
   leadsTable.reset();
+  usersLoaded = false;
   showLogin();
 });
 
-// ===== Tabs =====
-tabs.forEach((tab) => {
-  tab.addEventListener('click', () => {
-    tabs.forEach((t) => t.classList.remove('is-active'));
-    tab.classList.add('is-active');
-    Object.entries(panels).forEach(([key, panel]) => {
-      panel.hidden = key !== tab.dataset.tab;
-    });
-    if (tab.dataset.tab === 'registrations') registrationsTable.ensureLoaded();
-    if (tab.dataset.tab === 'leads') leadsTable.ensureLoaded();
-  });
+// ===== Sidebar / navigation =====
+function switchTab(key) {
+  sidebarLinks.forEach((link) => link.classList.toggle('is-active', link.dataset.tab === key));
+  Object.entries(panels).forEach(([k, panel]) => { panel.hidden = k !== key; });
+  pageTitle.textContent = PAGE_TITLES[key] || '';
+  closeSidebar();
+
+  if (key === 'home') loadHome();
+  if (key === 'registrations') registrationsTable.ensureLoaded();
+  if (key === 'leads') leadsTable.ensureLoaded();
+  if (key === 'users') loadUsers();
+}
+
+sidebarLinks.forEach((link) => {
+  link.addEventListener('click', () => switchTab(link.dataset.tab));
 });
+
+function openSidebar() {
+  sidebar.classList.add('is-open');
+  sidebarScrim.hidden = false;
+}
+function closeSidebar() {
+  sidebar.classList.remove('is-open');
+  sidebarScrim.hidden = true;
+}
+hamburgerBtn.addEventListener('click', openSidebar);
+sidebarScrim.addEventListener('click', closeSidebar);
+
+// ===== Home / analytics =====
+const homeStatus = document.getElementById('homeStatus');
+const homeContent = document.getElementById('homeContent');
+let homeLoaded = false;
+
+const STAT_ICONS = {
+  registrations: '<path d="M6 3h6l4 4v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M12 3v4h4"/>',
+  leads: '<circle cx="10" cy="10" r="7"/><path d="M3 10h14M10 3c1.8 2 2.8 4.4 2.8 7s-1 5-2.8 7c-1.8-2-2.8-4.4-2.8-7s1-5 2.8-7Z"/>',
+  callback: '<path d="M4 4h6l1.6 4-2 1.4a10 10 0 0 0 4 4l1.4-2 4 1.6v3a1 1 0 0 1-1 1C10 17 3 10 3 5a1 1 0 0 1 1-1Z"/>',
+  districts: '<path d="M10 17s6-5.3 6-9.5A6 6 0 0 0 4 7.5C4 11.7 10 17 10 17Z"/><circle cx="10" cy="7.5" r="2"/>',
+  students: '<circle cx="7.5" cy="6.5" r="2.5"/><path d="M2.8 16c.6-2.6 2.4-4 4.7-4s4.1 1.4 4.7 4"/><circle cx="14.5" cy="7" r="2"/><path d="M13 16c.4-1.9 1.6-3 3.2-3"/>',
+};
+
+function statCard(icon, tone, value, label) {
+  return `<div class="stat-card">
+    <div class="stat-card-icon ${tone}"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></div>
+    <div class="stat-card-value">${escapeHtml(value)}</div>
+    <div class="stat-card-label">${escapeHtml(label)}</div>
+  </div>`;
+}
+
+function miniTable(headers, rows, emptyText) {
+  if (!rows.length) return `<p class="empty-note">${escapeHtml(emptyText)}</p>`;
+  return `<table class="mini-table">
+    <thead><tr>${headers.map((h) => `<th${h.num ? ' class="num"' : ''}>${escapeHtml(h.label)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table>`;
+}
+
+async function loadHome() {
+  homeStatus.hidden = true;
+  homeContent.innerHTML = '<p class="empty-note">Loading…</p>';
+
+  try {
+    const res = await fetch('/api/analytics');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.result !== 'success') {
+      throw new Error(data.error || 'Could not load analytics');
+    }
+    homeLoaded = true;
+    renderHome(data);
+  } catch (err) {
+    homeContent.innerHTML = '';
+    homeStatus.hidden = false;
+    homeStatus.className = 'form-status error';
+    homeStatus.textContent = err.message || 'Could not load analytics.';
+  }
+}
+
+function renderHome(data) {
+  if (data.scope === 'own') {
+    const rows = data.recentRegistrations.map((r) => `<tr>
+      <td>${escapeHtml(formatDate(r.created_at))}</td>
+      <td>${escapeHtml(r.school_name || '—')}</td>
+      <td>${escapeHtml(r.district || '—')}</td>
+      <td>${escapeHtml(r.board || '—')}</td>
+    </tr>`);
+    homeContent.innerHTML = `
+      <div class="stat-grid-cards">
+        ${statCard(STAT_ICONS.registrations, 'ink', data.totals.schoolRegistrations, 'Your Registrations')}
+      </div>
+      <div class="analytics-panel">
+        <h3>Your Recent Submissions</h3>
+        ${miniTable(
+          [{ label: 'Date' }, { label: 'School' }, { label: 'District' }, { label: 'Board' }],
+          rows,
+          'No registrations submitted yet.'
+        )}
+      </div>`;
+    return;
+  }
+
+  const boardRows = data.boardBreakdown.map((b) => `<tr><td>${escapeHtml(b.board)}</td><td class="num">${escapeHtml(b.count)}</td></tr>`);
+  const districtRows = data.districtBreakdown.map((d) => `<tr><td>${escapeHtml(d.district)}</td><td class="num">${escapeHtml(d.count)}</td></tr>`);
+  const recentRegRows = data.recentRegistrations.map((r) => `<tr>
+    <td>${escapeHtml(formatDate(r.created_at))}</td>
+    <td>${escapeHtml(r.school_name || '—')}</td>
+    <td>${escapeHtml(r.district || '—')}</td>
+    <td>${escapeHtml(r.board || '—')}</td>
+  </tr>`);
+  const recentLeadRows = data.recentLeads.map((l) => `<tr>
+    <td>${escapeHtml(formatDate(l.created_at))}</td>
+    <td>${escapeHtml(l.name || '—')}</td>
+    <td>${escapeHtml(l.district || '—')}</td>
+    <td>${l.request_callback ? '<span class="badge badge-yes">Yes</span>' : '<span class="badge badge-no">No</span>'}</td>
+  </tr>`);
+
+  homeContent.innerHTML = `
+    <div class="stat-grid-cards">
+      ${statCard(STAT_ICONS.registrations, 'ink', data.totals.schoolRegistrations, 'School Registrations')}
+      ${statCard(STAT_ICONS.leads, 'teal', data.totals.websiteLeads, 'Website Leads')}
+      ${statCard(STAT_ICONS.callback, 'gold', data.totals.callbackRequests, 'Callback Requests')}
+      ${statCard(STAT_ICONS.districts, 'rose', data.totals.districts, 'Districts Covered')}
+    </div>
+    <div class="analytics-grid">
+      <div class="analytics-panel">
+        <h3>Registrations by Board</h3>
+        ${miniTable([{ label: 'Board' }, { label: 'Count', num: true }], boardRows, 'No registrations yet.')}
+      </div>
+      <div class="analytics-panel">
+        <h3>Registrations by District</h3>
+        ${miniTable([{ label: 'District' }, { label: 'Count', num: true }], districtRows, 'No registrations yet.')}
+      </div>
+    </div>
+    <div class="analytics-section-title">Recent Activity</div>
+    <div class="analytics-grid">
+      <div class="analytics-panel">
+        <h3>Recent Registrations</h3>
+        ${miniTable([{ label: 'Date' }, { label: 'School' }, { label: 'District' }, { label: 'Board' }], recentRegRows, 'No registrations yet.')}
+      </div>
+      <div class="analytics-panel">
+        <h3>Recent Website Leads</h3>
+        ${miniTable([{ label: 'Date' }, { label: 'Name' }, { label: 'District' }, { label: 'Callback' }], recentLeadRows, 'No leads yet.')}
+      </div>
+    </div>`;
+}
 
 // ===== New Registration form =====
 if (registerForm) {
@@ -157,6 +325,7 @@ if (registerForm) {
       formStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
       registrationsTable.markStale();
+      homeLoaded = false;
     } catch (err) {
       formStatus.hidden = false;
       formStatus.className = 'form-status error';
@@ -168,20 +337,12 @@ if (registerForm) {
   });
 }
 
-// ===== Generic table controller =====
-// Handles fetching a sheet's rows through /api/leads?sheet=..., then
-// client-side search/sort/filter/render for that table.
+// ===== Generic table controller (Registrations / From Website) =====
 function createTableController(config) {
   const {
-    sheetParam,           // 'dashboard' | 'website'
-    searchInput, refreshBtn, countEl, statusEl, tableEl, tableBody,
-    searchGetters,        // (row) => string[]
-    renderRow,             // (row, index) => tbody <tr> HTML string
-    colSpan,
-    defaultSortKey,
-    computed,               // { [computedKey]: (row) => value } for sort keys starting with "_"
-    equalityFilters,       // [{ select, field }] — field is a real row key
-    populateFilter,        // optional (rows) => void, fills a <select>'s dynamic options
+    sheetParam, searchInput, refreshBtn, countEl, statusEl, tableEl, tableBody,
+    searchGetters, renderRow, colSpan, defaultSortKey, computed,
+    equalityFilters, populateFilter,
   } = config;
 
   const state = { rows: [], loaded: false, sortKey: defaultSortKey, sortDir: 'desc' };
@@ -209,18 +370,9 @@ function createTableController(config) {
     }
   }
 
-  function ensureLoaded() {
-    if (!state.loaded) load();
-  }
-
-  function markStale() {
-    state.loaded = false;
-  }
-
-  function reset() {
-    state.rows = [];
-    state.loaded = false;
-  }
+  function ensureLoaded() { if (!state.loaded) load(); }
+  function markStale() { state.loaded = false; }
+  function reset() { state.rows = []; state.loaded = false; }
 
   function getFiltered() {
     const q = searchInput.value.trim().toLowerCase();
@@ -242,7 +394,6 @@ function createTableController(config) {
     return rows.slice().sort((a, b) => {
       let av = key.startsWith('_') ? computed[key](a) : a[key];
       let bv = key.startsWith('_') ? computed[key](b) : b[key];
-
       if (key === 'Timestamp') {
         av = av ? new Date(av).getTime() : 0;
         bv = bv ? new Date(bv).getTime() : 0;
@@ -269,7 +420,6 @@ function createTableController(config) {
       tableBody.innerHTML = `<tr class="table-empty-row"><td colspan="${colSpan}">No registrations match your filters.</td></tr>`;
       return;
     }
-
     tableBody.innerHTML = rows.map((row) => renderRow(row, state.rows.indexOf(row))).join('');
   }
 
@@ -283,12 +433,8 @@ function createTableController(config) {
   tableEl.querySelectorAll('thead th').forEach((th) => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
-      if (state.sortKey === key) {
-        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-      } else {
-        state.sortKey = key;
-        state.sortDir = 'asc';
-      }
+      if (state.sortKey === key) { state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc'; }
+      else { state.sortKey = key; state.sortDir = 'asc'; }
       render();
     });
   });
@@ -300,7 +446,6 @@ function createTableController(config) {
   return { ensureLoaded, markStale, reset };
 }
 
-// ===== "Registrations" table (dashboard's full form) =====
 function computeContact(row) {
   return row['Principal Name'] || row['Coordinator Name'] || row['School Name'] || '—';
 }
@@ -309,7 +454,6 @@ function computePhone(row) {
 }
 
 const regFilterBoard = document.getElementById('regFilterBoard');
-
 const registrationsTable = createTableController({
   sheetParam: 'dashboard',
   searchInput: document.getElementById('regSearchInput'),
@@ -343,9 +487,7 @@ const registrationsTable = createTableController({
   </tr>`,
 });
 
-// ===== "From Website" table (quick-lead form) =====
 const leadFilterCallback = document.getElementById('leadFilterCallback');
-
 const leadsTable = createTableController({
   sheetParam: 'website',
   searchInput: document.getElementById('leadSearchInput'),
@@ -369,6 +511,151 @@ const leadsTable = createTableController({
       <td><span class="badge ${cbClass}">${escapeHtml(row['Request Callback'] || 'No')}</span></td>
     </tr>`;
   },
+});
+
+// ===== Users (admin only) =====
+const userForm = document.getElementById('userForm');
+const usersStatus = document.getElementById('usersStatus');
+const usersTableBody = document.getElementById('usersTableBody');
+const newUsername = document.getElementById('newUsername');
+const newPassword = document.getElementById('newPassword');
+const newRole = document.getElementById('newRole');
+const newDistricts = document.getElementById('newDistricts');
+const userFormSubmitBtn = userForm.querySelector('button[type="submit"]');
+
+let usersLoaded = false;
+let editingUsername = null;
+
+async function loadUsers() {
+  usersStatus.hidden = true;
+  usersTableBody.innerHTML = '<tr class="table-empty-row"><td colspan="5">Loading…</td></tr>';
+  try {
+    const res = await fetch('/api/users');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.result !== 'success') throw new Error(data.error || 'Could not load users');
+    usersLoaded = true;
+    renderUsers(data.users);
+  } catch (err) {
+    usersTableBody.innerHTML = '';
+    usersStatus.hidden = false;
+    usersStatus.className = 'form-status error';
+    usersStatus.textContent = err.message || 'Could not load users.';
+  }
+}
+
+function renderUsers(users) {
+  if (!users.length) {
+    usersTableBody.innerHTML = '<tr class="table-empty-row"><td colspan="5">No users yet.</td></tr>';
+    return;
+  }
+  const roleBadge = { admin: 'badge-admin', poc: 'badge-poc', reader: 'badge-reader' };
+  usersTableBody.innerHTML = users.map((u) => `<tr>
+    <td>${escapeHtml(u.username)}</td>
+    <td><span class="badge ${roleBadge[u.role] || ''}">${escapeHtml(u.role)}</span></td>
+    <td>${u.districts && u.districts.length ? escapeHtml(u.districts.join(', ')) : '—'}</td>
+    <td>${escapeHtml(formatDate(u.created_at))}</td>
+    <td class="user-row-actions">
+      <button type="button" class="icon-btn" data-edit="${escapeHtml(u.username)}">Edit</button>
+      <button type="button" class="icon-btn danger" data-delete="${escapeHtml(u.username)}">Delete</button>
+    </td>
+  </tr>`).join('');
+
+  usersTableBody.querySelectorAll('[data-edit]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const u = users.find((x) => x.username === btn.dataset.edit);
+      if (!u) return;
+      editingUsername = u.username;
+      newUsername.value = u.username;
+      newUsername.disabled = true;
+      newPassword.value = '';
+      newPassword.required = false;
+      newPassword.placeholder = 'Leave blank to keep current password';
+      newRole.value = u.role;
+      newDistricts.value = (u.districts || []).join(', ');
+      userFormSubmitBtn.textContent = 'Update User';
+      userForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  usersTableBody.querySelectorAll('[data-delete]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Delete user "${btn.dataset.delete}"? This cannot be undone.`)) return;
+      try {
+        const res = await fetch(`/api/users?username=${encodeURIComponent(btn.dataset.delete)}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.result !== 'success') throw new Error(data.error || 'Could not delete user');
+        loadUsers();
+      } catch (err) {
+        usersStatus.hidden = false;
+        usersStatus.className = 'form-status error';
+        usersStatus.textContent = err.message || 'Could not delete user.';
+      }
+    });
+  });
+}
+
+function resetUserForm() {
+  editingUsername = null;
+  userForm.reset();
+  newUsername.disabled = false;
+  newPassword.required = true;
+  newPassword.placeholder = 'min. 6 characters';
+  userFormSubmitBtn.textContent = 'Add User';
+}
+
+userForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  usersStatus.hidden = true;
+  userFormSubmitBtn.disabled = true;
+
+  const districts = newDistricts.value.split(',').map((d) => d.trim()).filter(Boolean);
+  const payload = { username: newUsername.value.trim(), role: newRole.value, districts };
+  if (newPassword.value) payload.password = newPassword.value;
+
+  try {
+    const res = await fetch('/api/users', {
+      method: editingUsername ? 'PATCH' : 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.result !== 'success') throw new Error(data.error || 'Could not save user');
+    resetUserForm();
+    loadUsers();
+  } catch (err) {
+    usersStatus.hidden = false;
+    usersStatus.className = 'form-status error';
+    usersStatus.textContent = err.message || 'Could not save user.';
+  } finally {
+    userFormSubmitBtn.disabled = false;
+  }
+});
+
+// ===== Sync to Sheets (admin only) =====
+const syncBtn = document.getElementById('syncBtn');
+const syncStatus = document.getElementById('syncStatus');
+
+syncBtn.addEventListener('click', async () => {
+  syncStatus.hidden = true;
+  syncBtn.disabled = true;
+  const originalLabel = syncBtn.textContent;
+  syncBtn.textContent = 'Syncing…';
+
+  try {
+    const res = await fetch('/api/sync-sheets', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.result !== 'success') throw new Error(data.error || 'Sync failed');
+    syncStatus.hidden = false;
+    syncStatus.className = 'form-status success';
+    syncStatus.textContent = `Synced — ${data.websiteRows} website leads, ${data.dashboardRows} school registrations.`;
+  } catch (err) {
+    syncStatus.hidden = false;
+    syncStatus.className = 'form-status error';
+    syncStatus.textContent = err.message || 'Sync failed.';
+  } finally {
+    syncBtn.disabled = false;
+    syncBtn.textContent = originalLabel;
+  }
 });
 
 // ===== Init =====

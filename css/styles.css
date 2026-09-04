@@ -1,15 +1,16 @@
 :root{
+  /* Brand palette sampled from the Nava Dishe emblem (01_NavaDishe_emblem_icon.png). */
   --paper:#FFFFFF;
-  --paper-deep:#F0F4FF;
-  --ink:#0B1C30;
-  --ink-soft:#434655;
-  --primary:#1F4FD8;
-  --primary-deep:#0037B1;
-  --marigold:#FF7A18;
-  --marigold-deep:#9B4500;
-  --red:#FF7A18;
-  --rust:#9B4500;
-  --line: rgba(11,28,48,0.14);
+  --paper-deep:#EFF4F3;
+  --ink:#11244C;
+  --ink-soft:#4B5A6E;
+  --primary:#256B74;
+  --primary-deep:#153F46;
+  --marigold:#D19323;
+  --marigold-deep:#8C6318;
+  --red:#D19323;
+  --rust:#8C6318;
+  --line: rgba(17,36,76,0.14);
   --max: 1200px;
 }
 *{box-sizing:border-box;}
@@ -101,6 +102,8 @@ h1,h2,h3,h4{
   padding:14px 0;
 }
 .nav-brand{display:flex;align-items:center;gap:12px;}
+.nav-brand-link{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.brand-logo{height:34px;width:auto;object-fit:contain;flex:none;}
 .brand-word{
   font-family:'Plus Jakarta Sans', sans-serif;
   font-weight:800;
@@ -108,6 +111,8 @@ h1,h2,h3,h4{
   color:var(--ink);
   letter-spacing:-0.01em;
 }
+.masthead-partner{display:flex;align-items:center;gap:6px;}
+.masthead-partner-logo{height:16px;width:auto;object-fit:contain;}
 .nav-links{display:flex;align-items:center;gap:30px;}
 .nav-links a{
   font-family:'Inter',sans-serif;
@@ -443,7 +448,7 @@ section{padding:100px 0;}
 .partner-cat:first-child{padding-top:0;}
 .partner-cat-label{
   font-family:'Inter',sans-serif;font-size:11.5px;letter-spacing:0.09em;text-transform:uppercase;
-  font-weight:700;color:var(--rust);background:rgba(255,122,24,0.12);
+  font-weight:700;color:var(--rust);background:rgba(209,147,35,0.14);
   display:inline-block;padding:5px 12px;border-radius:3px;margin-bottom:14px;
 }
 .partner-names{display:flex;flex-wrap:wrap;gap:10px 22px;}
@@ -574,6 +579,7 @@ footer{background:var(--ink);color:var(--paper);padding:60px 0 24px;}
 .foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,0.2);}
 .brand-word--footer{color:var(--paper);font-size:24px;}
 .foot-brand p{color:rgba(255,255,255,0.65);font-size:14.5px;margin-top:16px;max-width:280px;}
+.foot-partner-logo{height:30px;width:auto;object-fit:contain;margin-top:20px;}
 .foot-col h5{
   font-family:'Inter',sans-serif;font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;
   color:var(--marigold);margin-bottom:16px;font-weight:700;

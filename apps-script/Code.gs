@@ -76,6 +76,20 @@ function appendDashboardRow_(p) {
 
 function doPost(e) {
   try {
+    // JSON body: only used by the dashboard's admin-triggered "Sync to
+    // Sheets" action, which replaces a sheet's data wholesale from Neon
+    // Postgres (the real source of truth now — see api/sync-sheets.js).
+    if (e.postData && e.postData.type === 'application/json') {
+      var body = JSON.parse(e.postData.contents);
+      if (body.action === 'syncReplace') {
+        return handleSyncReplace_(body);
+      }
+      return jsonOutput_({ result: 'error', error: 'Unknown action' });
+    }
+
+    // Form-encoded body: a direct single-row submission (kept for backward
+    // compatibility / manual testing — the live site posts to Postgres via
+    // api/register.js instead, not here, as of the Neon migration).
     var p = e.parameter;
 
     // Ignore bot submissions caught by the honeypot field
@@ -94,6 +108,36 @@ function doPost(e) {
   } catch (err) {
     return jsonOutput_({ result: 'error', error: err.toString() });
   }
+}
+
+// Wholesale-replaces one sheet's data rows (header kept) with the rows Neon
+// Postgres currently holds. Gated by the same READ_KEY used for ?action=list
+// — both are privileged, server-to-server-only operations.
+function handleSyncReplace_(body) {
+  var readKey = PropertiesService.getScriptProperties().getProperty('READ_KEY');
+  if (!readKey || body.key !== readKey) {
+    return jsonOutput_({ result: 'error', error: 'Unauthorized' });
+  }
+
+  var isWebsite = body.sheet === 'website';
+  var name = isWebsite ? WEBSITE_SHEET_NAME : DASHBOARD_SHEET_NAME;
+  var headers = isWebsite ? WEBSITE_HEADERS : DASHBOARD_HEADERS;
+  var sheet = getOrCreateSheet_(name, headers);
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+  }
+
+  var rows = body.rows || [];
+  if (rows.length > 0) {
+    var values = rows.map(function (row) {
+      return headers.map(function (h) { return row[h] !== undefined && row[h] !== null ? row[h] : ''; });
+    });
+    sheet.getRange(2, 1, values.length, headers.length).setValues(values);
+  }
+
+  return jsonOutput_({ result: 'success', written: rows.length });
 }
 
 // GET with no params: lets you sanity-check the deployment by visiting the

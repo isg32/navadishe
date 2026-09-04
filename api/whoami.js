@@ -9,5 +9,10 @@ export default async function handler(request) {
   if (!session) {
     return jsonResponse({ authenticated: false }, 401);
   }
-  return jsonResponse({ authenticated: true, username: session.u });
+  return jsonResponse({
+    authenticated: true,
+    username: session.u,
+    role: session.role,
+    districts: session.districts || [],
+  });
 }

@@ -1,82 +1,122 @@
 # Nava Dishe — Setup
 
-A single-page marketing site for **Nava Dishe**, presented by News First, plus a login-gated internal **dashboard** (`dashboard.html`) for staff. Both write into the same Google Sheet (via a Google Apps Script web app), but into two separate tabs:
+A public site (`index.html`) plus a login-gated internal **dashboard** (`dashboard.html`) for News First staff. **Neon Postgres is the source of truth** for both forms; Google Sheets is an optional, admin-triggered export ("Sync to Sheets" in the dashboard), not written on every submission.
 
-- `index.html` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback". Rows land in the **"Website Leads"** sheet tab.
-- `dashboard.html` — staff-only. After signing in, staff can (1) fill in the full Disha-style registration form once a school is confirmed — rows land in the **"School Registrations"** sheet tab — and (2) search/sort/filter each of those two tabs in its own table.
+- `index.html` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback" → `website_leads` table.
+- `dashboard.html` — staff-only, behind real login (`app_users` table, not an env-var dictionary). A sidebar (drawer + hamburger on mobile) with:
+  - **Home** — an analytics screen: totals, board/district breakdowns, recent activity. Scoped to what the signed-in user is allowed to see.
+  - **New Registration** — the full Disha-style form → `school_registrations` table.
+  - **Registrations** / **From Website** — searchable, sortable, filterable tables over the two Postgres tables.
+  - **Users** (admin only) — create logins, set roles and district access.
+  - **Sync to Sheets** (admin only) — pushes the current Postgres data into the Google Sheet.
 
-None of the following are ever visible to a browser: the Apps Script URL, the dashboard login credentials, or the session-signing secret. Each is read server-side by a Vercel Edge Function from an environment variable.
+Nothing secret ever reaches the browser — the Neon connection string, Apps Script URL, and session-signing secret are all read server-side by Vercel Edge Functions from environment variables.
 
-## 1. Deploying to Vercel
+## 1. Roles
 
-1. Push this project to a Git repo and import it into Vercel (or run `vercel` from this directory).
-2. In Vercel → Project Settings → Environment Variables, add the four variables described in §2 below.
-3. Deploy. Vercel auto-detects `index.html`/`dashboard.html`/`css`/`js`/`images` as static output and everything under `api/` as serverless functions — no build command or `vercel.json` needed.
+Set on each row in `app_users`, enforced both server-side (every `api/*.js`) and in the sidebar:
+
+| Role | Can do |
+|---|---|
+| `admin` | Everything — both tables (all districts), the entry form, Users, Sync to Sheets. |
+| `poc` | Only the New Registration form. No list access at all (so, by construction, can submit but never edit or browse past entries). |
+| `reader` | Read-only, and only for the districts listed on their account (`districts: text[]`). A reader with no districts assigned sees nothing. |
+
+Manage users from the dashboard's **Users** page (admin-only), or via `node db/create-user.js <username> <password> <admin|poc|reader> [district,district]`.
 
 ## 2. Environment variables
 
-Copy `.env.example` to `.env.local` for local testing, and set the same four in Vercel for production:
-
 | Variable | What it's for |
 |---|---|
-| `APPS_SCRIPT_URL` | Your deployed Apps Script web app URL (§3). |
-| `DASHBOARD_USERS` | A JSON object of dashboard logins, e.g. `{"admin":"a-real-password","priya":"another-password"}`. Add or remove staff by editing this — no code changes. |
-| `SESSION_SECRET` | A long random string used to sign the dashboard's login session cookie. Generate one with `openssl rand -hex 32`. |
-| `SHEET_READ_KEY` | A long random string that lets the dashboard *read* sheet rows. Must exactly match a Script Property of the same name in the Apps Script project (§3, step 8). |
+| `NEON_URL` | Postgres connection string (Neon console → Connection Details). |
+| `SESSION_SECRET` | Long random string signing the login session cookie. `openssl rand -hex 32`. |
+| `APPS_SCRIPT_URL` | Your deployed Apps Script web app URL (§4) — only used by "Sync to Sheets" now. |
+| `SHEET_READ_KEY` | Long random string gating the sync. Must match a Script Property named `READ_KEY` in the Apps Script project. |
+| `DASHBOARD_USERS` | Only read once, by `node db/migrate.js`, to seed your first admin if `app_users` is empty. Safe to delete afterward. |
 
 ```bash
 cp .env.example .env.local
 # fill in real values, then:
+node db/migrate.js   # creates the schema, seeds an admin from DASHBOARD_USERS
 vercel dev
 ```
 
-`vercel dev` serves the static site and runs everything under `api/` locally. `.env.local` is git-ignored — never commit it.
+**Important for `vercel dev`:** a plain `.env.local` is *not* enough for the Edge Functions under local dev — Vercel's local Edge runtime only sees variables actually registered for the `development` environment, not arbitrary `.env.local` contents. Register each one once:
 
-If you just want to preview the static pages, `python3 -m http.server` also works — but the registration form and the whole dashboard need `vercel dev` (or a real deployment) since they depend on the `api/` functions.
+```bash
+for var in NEON_URL SESSION_SECRET APPS_SCRIPT_URL SHEET_READ_KEY DASHBOARD_USERS; do
+  grep "^$var=" .env.local | cut -d= -f2- | vercel env add "$var" development
+done
+```
 
-## 3. Connect it to Google Sheets
+(In the real Vercel deployment, add the same variables for Production/Preview the normal way — Project Settings → Environment Variables.)
 
-1. Go to https://sheets.google.com and create a new spreadsheet — name it e.g. "Nava Dishe Registrations".
+`.env.local` is git-ignored — never commit it.
+
+## 3. Database
+
+Schema lives in `db/schema.sql` (three tables: `app_users`, `website_leads`, `school_registrations`). Apply it — and seed a first admin from `DASHBOARD_USERS` if `app_users` is still empty — with:
+
+```bash
+node db/migrate.js
+```
+
+It's idempotent (`create table if not exists`), safe to re-run any time you pull schema changes.
+
+> **Neon Auth note:** this Neon project already has Neon's managed-auth schema provisioned (`neon_auth.*`, visible via the Neon console's Auth tab) — but that's Neon's own *hosted* auth service, requiring a `NEON_AUTH_BASE_URL` and a cookie secret from Console → Auth → Configuration that weren't available when this was built. The roles system above uses a plain `app_users` table with its own PBKDF2 password hashing and the same signed-cookie session mechanism as before — genuinely real accounts, stored in the same Neon database, just not Neon's specific hosted product. Swapping to the managed service later is a contained change (only `api/login.js`/`api/_session.js`), not a rewrite of the roles/permissions logic.
+
+## 4. Connect "Sync to Sheets" to Google Sheets
+
+Sheets is optional now — only the admin-only "Sync to Sheets" button uses it, wholesale-replacing the sheet's contents from Postgres. If you want it:
+
+1. Go to https://sheets.google.com and create a new spreadsheet.
 2. In the sheet, go to Extensions → Apps Script.
 3. Delete any starter code, then paste in the contents of `apps-script/Code.gs`.
-4. Click Deploy → New deployment.
-5. Click the gear icon next to "Select type" → choose Web app.
-6. Set "Execute as" to Me, and "Who has access" to Anyone.
-7. Click Deploy, and authorize the script when prompted (you'll see an "unverified app" warning — click Advanced → Go to [project name] → Allow; this is expected for your own script).
-8. In the Apps Script editor, go to Project Settings → Script properties → Add script property. Add one named `READ_KEY`, with the **same value** as `SHEET_READ_KEY` in your `.env.local` / Vercel env vars. This is what stops anyone who merely finds the Apps Script URL from reading your data — only requests carrying the matching key can list rows.
-9. Copy the Web app URL you're given — this is the value that goes into `APPS_SCRIPT_URL`, never into a committed file.
-10. Submit a test entry from the live site and confirm a new row appears in the "Website Leads" tab, and a dashboard entry appears in "School Registrations" — both tabs are created automatically the first time each form is used.
+4. Deploy → New deployment → gear icon → Web app. Execute as Me, access Anyone.
+5. Authorize when prompted (Advanced → Go to [project] → Allow — expected for your own script).
+6. Project Settings → Script properties → add `READ_KEY`, same value as `SHEET_READ_KEY`.
+7. Copy the Web app URL into `APPS_SCRIPT_URL`.
+8. From the dashboard's Sync to Sheets page, run a sync and confirm the "Website Leads" and "School Registrations" tabs populate.
 
-Whenever you edit `Code.gs` later, you must go to Deploy → Manage deployments → Edit (pencil icon) → New version → Deploy for the changes to go live — saving the script alone does not update the deployed web app.
+Whenever you edit `Code.gs`, redeploy it (Deploy → Manage deployments → Edit → New version → Deploy) — saving alone doesn't update the live URL.
 
-## 4. Using the dashboard
+## 5. Deploying to Vercel
 
-Visit `/dashboard.html` and sign in with one of the `DASHBOARD_USERS` credentials. Nothing under it is indexed by search engines (`<meta name="robots" content="noindex, nofollow">`), but it isn't linked from the public site either — share the URL directly with staff.
+1. Push this project to a Git repo and import it into Vercel (or run `vercel` from this directory).
+2. Add the environment variables from §2 in Project Settings → Environment Variables (Production/Preview).
+3. Deploy. Vercel auto-detects the static files and everything under `api/` as Edge Functions — no build command or `vercel.json` needed.
+4. Run `node db/migrate.js` once (pointed at the same `NEON_URL`) to set up the schema and your first admin.
 
-- **New Registration** — the full form (school, principal, coordinator, student strength, News First/vendor coordination, test date). Saves to the "School Registrations" sheet tab. The form resets after each save so staff can enter several schools in a row.
-- **Registrations** — every row from "School Registrations", with free-text search, column sorting, and a board filter. Click a row for its full details.
-- **From Website** — every row from "Website Leads" (the public quick-lead form), with free-text search, column sorting, and a callback-requested filter.
+`dashboard.html` isn't linked from the public site and carries `<meta name="robots" content="noindex, nofollow">` — share its URL with staff directly.
 
-## 5. Project structure
+## 6. Project structure
 
 ```
-index.html                The public site — structure and copy
-dashboard.html             Staff dashboard — login, entry form, and registrations table
-css/styles.css              Shared styling (colors, type, layout, responsive rules)
-css/dashboard.css           Dashboard-only styling (login card, tabs, table)
+index.html                The public site
+dashboard.html             Staff dashboard — sidebar shell, all panels
+css/styles.css              Shared styling (brand tokens, layout, responsive rules)
+css/dashboard.css           Dashboard-only styling (sidebar, stat cards, tables, users)
 js/main.js                   Mobile menu, scroll-reveal, public quick-lead form submit
-js/dashboard.js              Login, tab switching, entry form submit, table search/sort/filter
-api/register.js              Vercel Edge Function — proxies form POSTs, keeps APPS_SCRIPT_URL server-side
-api/login.js                 Vercel Edge Function — checks DASHBOARD_USERS, issues a signed session cookie
-api/logout.js                Vercel Edge Function — clears the session cookie
-api/whoami.js                Vercel Edge Function — lets dashboard.html check for an existing session on load
-api/leads.js                 Vercel Edge Function — session-gated proxy that lists rows for either sheet tab (?sheet=website|dashboard)
-api/_session.js              Shared HMAC session-signing helpers used by the four api/*.js above
-images/                      Stock photography (Pexels, free license) + favicon.svg
-apps-script/Code.gs           Google Apps Script source — paste into script.google.com
-.env.example                  Template for the local .env.local (git-ignored)
+js/dashboard.js              Auth/session, sidebar nav, Home analytics, tables, Users, Sync
+api/register.js              Writes a submission to Postgres (website_leads or school_registrations)
+api/leads.js                 Session+role+district-gated reader for either Postgres table
+api/analytics.js             Session+role+district-gated aggregates for the Home page
+api/login.js                 Checks app_users (Postgres), issues a signed session cookie
+api/logout.js                Clears the session cookie
+api/whoami.js                Lets dashboard.html check for an existing session on load
+api/users.js                 Admin-only CRUD over app_users
+api/sync-sheets.js            Admin-only: pushes Postgres data into Google Sheets
+api/_session.js               Shared HMAC session-signing helpers
+api/_auth.js                  Password hashing (PBKDF2) + ROLE_NAV permissions table
+api/_db.js                    Shared Neon connection helper
+db/schema.sql                 Table definitions
+db/migrate.js                 Applies schema.sql, seeds a first admin from DASHBOARD_USERS
+db/create-user.js             CLI to create/update a dashboard user
+images/                       01_NavaDishe_emblem_icon.png (site logo/favicon), 02_News1st_logo.png (partner), stock photography
+apps-script/Code.gs            Google Apps Script source — paste into script.google.com
+.env.example                   Template for the local .env.local (git-ignored)
 ```
 
-## 6. Image credits
+## 7. Image credits
 
 Photography sourced from [Pexels](https://www.pexels.com) under the Pexels License (free for commercial use, no attribution required).

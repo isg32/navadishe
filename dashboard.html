@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nava Dishe — Dashboard</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="images/01_NavaDishe_emblem_icon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,10 @@
 <!-- ===== LOGIN ===== -->
 <div id="loginView" class="login-view">
   <form id="loginForm" class="login-card">
-    <div class="brand-word login-brand">Nava Dishe</div>
+    <div class="login-logo">
+      <img src="images/01_NavaDishe_emblem_icon.png" alt="">
+      <div class="brand-word login-brand">Nava Dishe</div>
+    </div>
     <p class="login-sub">Staff dashboard — sign in to continue.</p>
 
     <div id="loginStatus" class="form-status error" hidden></div>
@@ -32,240 +35,340 @@
     </div>
 
     <button type="submit" class="btn btn-primary login-btn">Sign In</button>
+
+    <div class="login-partner">
+      <img src="images/02_News1st_logo.png" alt="News First">
+      <span>presented by News First</span>
+    </div>
   </form>
 </div>
 
-<!-- ===== DASHBOARD ===== -->
-<div id="dashboardView" class="dashboard-view" hidden>
-  <header class="dash-header">
-    <div class="brand-word">Nava Dishe</div>
-    <div class="dash-header-right">
-      <span class="dash-user">Signed in as <strong id="whoamiUser"></strong></span>
-      <button id="logoutBtn" class="btn btn-ghost dash-logout">Log Out</button>
-    </div>
-  </header>
+<!-- ===== DASHBOARD SHELL ===== -->
+<div id="dashboardView" hidden>
+  <div class="dash-shell">
+    <div id="sidebarScrim" class="sidebar-scrim" hidden></div>
 
-  <nav class="dash-tabs">
-    <div class="wrap dash-tabs-wrap">
-      <button type="button" class="dash-tab is-active" data-tab="form">New Registration</button>
-      <button type="button" class="dash-tab" data-tab="registrations">Registrations</button>
-      <button type="button" class="dash-tab" data-tab="leads">From Website</button>
-    </div>
-  </nav>
+    <aside id="sidebar" class="dash-sidebar">
+      <div class="sidebar-brand">
+        <img src="images/01_NavaDishe_emblem_icon.png" alt="">
+        <span>Nava Dishe</span>
+      </div>
 
-  <main class="wrap dash-main">
+      <nav class="sidebar-nav" id="sidebarNav">
+        <button type="button" class="sidebar-link" data-tab="home">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 10 3l7 6.5"/><path d="M5 8.5V17h10V8.5"/></svg>
+          <span>Home</span>
+        </button>
+        <button type="button" class="sidebar-link" data-tab="form">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v11A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M11.5 3v4.5H16"/><path d="M10 10.5v4M8 12.5h4"/></svg>
+          <span>New Registration</span>
+        </button>
+        <button type="button" class="sidebar-link" data-tab="registrations">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="14" rx="1.3"/><path d="M7 7.5h6M7 10.5h6M7 13.5h4"/></svg>
+          <span>Registrations</span>
+        </button>
+        <button type="button" class="sidebar-link" data-tab="leads">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M3 10h14M10 3c1.8 2 2.8 4.4 2.8 7s-1 5-2.8 7c-1.8-2-2.8-4.4-2.8-7s1-5 2.8-7Z"/></svg>
+          <span>From Website</span>
+        </button>
+        <button type="button" class="sidebar-link" data-tab="users">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2.8 16c.6-2.6 2.4-4 4.7-4s4.1 1.4 4.7 4"/><circle cx="14.5" cy="7" r="2"/><path d="M13 16c.4-1.9 1.6-3 3.2-3"/></svg>
+          <span>Users</span>
+        </button>
+        <button type="button" class="sidebar-link" data-tab="sync">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 9A6 6 0 0 0 5.6 5.6L4 7.2M4 11a6 6 0 0 0 10.4 3.4L16 12.8"/><path d="M4 4v3.5h3.5M16 16v-3.5h-3.5"/></svg>
+          <span>Sync to Sheets</span>
+        </button>
+      </nav>
 
-    <!-- ===== FORM TAB ===== -->
-    <section id="formTab" class="dash-panel">
-      <div class="register-panel">
-        <div class="section-head" style="margin-bottom:32px;">
-          <div>
-            <div class="eyebrow">Staff Entry</div>
-            <h2>New School<br>Registration</h2>
-          </div>
-          <p>Full registration details, same as the Disha registration form. Saves to the "School Registrations" sheet — separate from the website's quick-lead form.</p>
+      <div class="sidebar-footer">
+        <img src="images/02_News1st_logo.png" alt="News First">
+        <span>presented by News First</span>
+      </div>
+    </aside>
+
+    <div class="dash-main-col">
+      <header class="dash-topbar">
+        <button id="hamburgerBtn" class="hamburger-btn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <h1 id="pageTitle">Home</h1>
+        <div class="topbar-right">
+          <span class="dash-user">Signed in as <strong id="whoamiUser"></strong><span id="whoamiRole" class="role-pill"></span></span>
+          <button id="logoutBtn" class="btn btn-ghost dash-logout">Log Out</button>
         </div>
+      </header>
 
-        <form id="registerForm" class="register-form">
-          <input type="hidden" name="source" value="Dashboard">
+      <main class="dash-content">
 
-          <div class="field field-wide">
-            <label for="schoolName">School Name <span class="req">*</span></label>
-            <input type="text" id="schoolName" name="schoolName" required aria-required="true">
-          </div>
-          <div class="field field-wide">
-            <label for="schoolAddress">School Address <span class="req">*</span></label>
-            <input type="text" id="schoolAddress" name="schoolAddress" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="city">City <span class="req">*</span></label>
-            <input type="text" id="city" name="city" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="district">District <span class="req">*</span></label>
-            <input type="text" id="district" name="district" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="state">State <span class="req">*</span></label>
-            <input type="text" id="state" name="state" value="Karnataka" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="pincode">Pin-code <span class="req">*</span></label>
-            <input type="text" id="pincode" name="pincode" inputmode="numeric" pattern="[0-9]{6}" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="board">School Board <span class="req">*</span></label>
-            <select id="board" name="board" required aria-required="true">
-              <option value="" disabled selected>Select board</option>
-              <option>CBSE</option>
-              <option>ICSE</option>
-              <option>State Board</option>
-              <option>Other</option>
+        <!-- ===== HOME / ANALYTICS ===== -->
+        <section id="homeTab" class="dash-panel">
+          <div id="homeStatus" class="form-status" hidden></div>
+          <div id="homeContent"></div>
+        </section>
+
+        <!-- ===== NEW REGISTRATION ===== -->
+        <section id="formTab" class="dash-panel" hidden>
+          <p class="panel-intro">Full registration details, same as the Disha registration form. Saves to the "School Registrations" table — separate from the website's quick-lead form.</p>
+
+          <form id="registerForm" class="register-form">
+            <input type="hidden" name="source" value="Dashboard">
+
+            <div class="field field-wide">
+              <label for="schoolName">School Name <span class="req">*</span></label>
+              <input type="text" id="schoolName" name="schoolName" required aria-required="true">
+            </div>
+            <div class="field field-wide">
+              <label for="schoolAddress">School Address <span class="req">*</span></label>
+              <input type="text" id="schoolAddress" name="schoolAddress" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="city">City <span class="req">*</span></label>
+              <input type="text" id="city" name="city" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="district">District <span class="req">*</span></label>
+              <input type="text" id="district" name="district" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="state">State <span class="req">*</span></label>
+              <input type="text" id="state" name="state" value="Karnataka" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="pincode">Pin-code <span class="req">*</span></label>
+              <input type="text" id="pincode" name="pincode" inputmode="numeric" pattern="[0-9]{6}" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="board">School Board <span class="req">*</span></label>
+              <select id="board" name="board" required aria-required="true">
+                <option value="" disabled selected>Select board</option>
+                <option>CBSE</option>
+                <option>ICSE</option>
+                <option>State Board</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="branchName">Branch Name</label>
+              <input type="text" id="branchName" name="branchName" placeholder="If part of a school group">
+            </div>
+            <div class="field">
+              <label for="schoolPhone">School Contact Number <span class="req">*</span></label>
+              <input type="tel" id="schoolPhone" name="schoolPhone" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="schoolEmail">School Email Id <span class="req">*</span></label>
+              <input type="email" id="schoolEmail" name="schoolEmail" required aria-required="true">
+            </div>
+
+            <div class="field-wide form-subhead">Principal Details</div>
+            <div class="field">
+              <label for="principalName">Principal Name <span class="req">*</span></label>
+              <input type="text" id="principalName" name="principalName" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="principalPhone">Mobile Number <span class="req">*</span></label>
+              <input type="tel" id="principalPhone" name="principalPhone" required aria-required="true">
+            </div>
+            <div class="field field-wide">
+              <label for="principalEmail">Principal Email Id</label>
+              <input type="email" id="principalEmail" name="principalEmail">
+            </div>
+
+            <div class="field-wide form-subhead">Coordinator Details</div>
+            <div class="field">
+              <label for="coordinatorName">Coordinator Name <span class="req">*</span></label>
+              <input type="text" id="coordinatorName" name="coordinatorName" required aria-required="true">
+            </div>
+            <div class="field">
+              <label for="coordinatorPhone">Mobile Number <span class="req">*</span></label>
+              <input type="tel" id="coordinatorPhone" name="coordinatorPhone" required aria-required="true">
+            </div>
+            <div class="field field-wide">
+              <label for="coordinatorEmail">Coordinator Email Id</label>
+              <input type="email" id="coordinatorEmail" name="coordinatorEmail">
+            </div>
+
+            <div class="field-wide form-subhead">Student Strength <span class="form-subhead-note">(based on the numbers provided, we will issue question papers &amp; OMR sheets)</span></div>
+            <div class="field-wide strength-grid">
+              <div class="field">
+                <label for="studentsClass1to9">Class 1st&ndash;9th</label>
+                <input type="number" id="studentsClass1to9" name="studentsClass1to9" min="0">
+              </div>
+              <div class="field">
+                <label for="studentsClass10">Class 10th</label>
+                <input type="number" id="studentsClass10" name="studentsClass10" min="0">
+              </div>
+              <div class="field">
+                <label for="studentsClass11">Class 11th</label>
+                <input type="number" id="studentsClass11" name="studentsClass11" min="0">
+              </div>
+              <div class="field">
+                <label for="studentsClass12">Class 12th</label>
+                <input type="number" id="studentsClass12" name="studentsClass12" min="0">
+              </div>
+            </div>
+
+            <div class="field-wide form-subhead">News First &amp; Vendor Coordination</div>
+            <div class="field">
+              <label for="newsFirstPocName">News First POC Name</label>
+              <input type="text" id="newsFirstPocName" name="newsFirstPocName">
+            </div>
+            <div class="field">
+              <label for="newsFirstPocPhone">Mobile Number</label>
+              <input type="tel" id="newsFirstPocPhone" name="newsFirstPocPhone">
+            </div>
+            <div class="field">
+              <label for="vendorName">Vendor Name</label>
+              <input type="text" id="vendorName" name="vendorName">
+            </div>
+            <div class="field">
+              <label for="vendorPhone">Mobile Number</label>
+              <input type="tel" id="vendorPhone" name="vendorPhone">
+            </div>
+
+            <div class="field">
+              <label for="testDate">Test Date</label>
+              <input type="date" id="testDate" name="testDate">
+              <p class="field-hint">Please fill the test date as provided to the Nava Dishe coordinator.</p>
+            </div>
+
+            <div class="field field-wide">
+              <label for="message">Message / Notes</label>
+              <textarea id="message" name="message" rows="4"></textarea>
+            </div>
+
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp-field" aria-hidden="true">
+
+            <div class="field field-wide">
+              <button type="submit" class="btn btn-primary">Save Registration</button>
+            </div>
+          </form>
+
+          <div id="formStatus" class="form-status" hidden aria-live="polite"></div>
+        </section>
+
+        <!-- ===== REGISTRATIONS (dashboard's full form) ===== -->
+        <section id="registrationsTab" class="dash-panel" hidden>
+          <div class="table-toolbar">
+            <input type="search" id="regSearchInput" class="table-search" placeholder="Search contact, phone, district, school…">
+            <select id="regFilterBoard" class="table-filter">
+              <option value="">All Boards</option>
             </select>
-          </div>
-          <div class="field">
-            <label for="branchName">Branch Name</label>
-            <input type="text" id="branchName" name="branchName" placeholder="If part of a school group">
-          </div>
-          <div class="field">
-            <label for="schoolPhone">School Contact Number <span class="req">*</span></label>
-            <input type="tel" id="schoolPhone" name="schoolPhone" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="schoolEmail">School Email Id <span class="req">*</span></label>
-            <input type="email" id="schoolEmail" name="schoolEmail" required aria-required="true">
+            <button type="button" id="regRefreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
+            <span id="regRowCount" class="table-count"></span>
           </div>
 
-          <div class="field-wide form-subhead">Principal Details</div>
-          <div class="field">
-            <label for="principalName">Principal Name <span class="req">*</span></label>
-            <input type="text" id="principalName" name="principalName" required aria-required="true">
+          <div id="regTableStatus" class="form-status" hidden></div>
+
+          <div class="table-wrap">
+            <table class="dash-table" id="regTable">
+              <thead>
+                <tr>
+                  <th data-sort="Timestamp">Date</th>
+                  <th data-sort="_contact">Contact</th>
+                  <th data-sort="_phone">Phone</th>
+                  <th data-sort="District">District</th>
+                  <th data-sort="School Name">School</th>
+                  <th data-sort="School Board">Board</th>
+                </tr>
+              </thead>
+              <tbody id="regTableBody"></tbody>
+            </table>
           </div>
-          <div class="field">
-            <label for="principalPhone">Mobile Number <span class="req">*</span></label>
-            <input type="tel" id="principalPhone" name="principalPhone" required aria-required="true">
-          </div>
-          <div class="field field-wide">
-            <label for="principalEmail">Principal Email Id</label>
-            <input type="email" id="principalEmail" name="principalEmail">
+        </section>
+
+        <!-- ===== FROM WEBSITE (quick-lead form) ===== -->
+        <section id="leadsTab" class="dash-panel" hidden>
+          <div class="table-toolbar">
+            <input type="search" id="leadSearchInput" class="table-search" placeholder="Search name, phone, district…">
+            <select id="leadFilterCallback" class="table-filter">
+              <option value="">Callback: All</option>
+              <option value="Yes">Callback: Requested</option>
+              <option value="No">Callback: Not requested</option>
+            </select>
+            <button type="button" id="leadRefreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
+            <span id="leadRowCount" class="table-count"></span>
           </div>
 
-          <div class="field-wide form-subhead">Coordinator Details</div>
-          <div class="field">
-            <label for="coordinatorName">Coordinator Name <span class="req">*</span></label>
-            <input type="text" id="coordinatorName" name="coordinatorName" required aria-required="true">
-          </div>
-          <div class="field">
-            <label for="coordinatorPhone">Mobile Number <span class="req">*</span></label>
-            <input type="tel" id="coordinatorPhone" name="coordinatorPhone" required aria-required="true">
-          </div>
-          <div class="field field-wide">
-            <label for="coordinatorEmail">Coordinator Email Id</label>
-            <input type="email" id="coordinatorEmail" name="coordinatorEmail">
-          </div>
+          <div id="leadTableStatus" class="form-status" hidden></div>
 
-          <div class="field-wide form-subhead">Student Strength <span class="form-subhead-note">(based on the numbers provided, we will issue question papers &amp; OMR sheets)</span></div>
-          <div class="field-wide strength-grid">
+          <div class="table-wrap">
+            <table class="dash-table" id="leadTable">
+              <thead>
+                <tr>
+                  <th data-sort="Timestamp">Date</th>
+                  <th data-sort="Name">Name</th>
+                  <th data-sort="District">District</th>
+                  <th data-sort="Phone">Phone</th>
+                  <th data-sort="Request Callback">Callback</th>
+                </tr>
+              </thead>
+              <tbody id="leadTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== USERS (admin only) ===== -->
+        <section id="usersTab" class="dash-panel" hidden>
+          <p class="panel-intro">Create dashboard logins and set who can see which districts.</p>
+
+          <form id="userForm" class="user-form">
             <div class="field">
-              <label for="studentsClass1to9">Class 1st&ndash;9th</label>
-              <input type="number" id="studentsClass1to9" name="studentsClass1to9" min="0">
+              <label for="newUsername">Username</label>
+              <input type="text" id="newUsername" required>
             </div>
             <div class="field">
-              <label for="studentsClass10">Class 10th</label>
-              <input type="number" id="studentsClass10" name="studentsClass10" min="0">
+              <label for="newPassword">Password</label>
+              <input type="text" id="newPassword" placeholder="min. 6 characters" required>
             </div>
             <div class="field">
-              <label for="studentsClass11">Class 11th</label>
-              <input type="number" id="studentsClass11" name="studentsClass11" min="0">
+              <label for="newRole">Role</label>
+              <select id="newRole">
+                <option value="admin">Admin — full access</option>
+                <option value="poc">POC — submits registrations only</option>
+                <option value="reader" selected>Reader — read-only, by district</option>
+              </select>
             </div>
             <div class="field">
-              <label for="studentsClass12">Class 12th</label>
-              <input type="number" id="studentsClass12" name="studentsClass12" min="0">
+              <label for="newDistricts">Districts (reader only, comma-separated)</label>
+              <input type="text" id="newDistricts" placeholder="e.g. Mysuru, Bengaluru Urban">
             </div>
+            <div class="field field-wide">
+              <button type="submit" class="btn btn-primary">Add User</button>
+            </div>
+          </form>
+
+          <div id="usersStatus" class="form-status" hidden></div>
+
+          <div class="table-wrap">
+            <table class="dash-table" id="usersTable">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Districts</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
           </div>
+        </section>
 
-          <div class="field-wide form-subhead">News First &amp; Vendor Coordination</div>
-          <div class="field">
-            <label for="newsFirstPocName">News First POC Name</label>
-            <input type="text" id="newsFirstPocName" name="newsFirstPocName">
+        <!-- ===== SYNC TO SHEETS (admin only) ===== -->
+        <section id="syncTab" class="dash-panel" hidden>
+          <div class="sync-card">
+            <p>Neon Postgres is the source of truth for every registration. This replaces the "Website Leads" and "School Registrations" tabs in Google Sheets with whatever is currently in the database — use it whenever you want an up-to-date copy in Sheets.</p>
+            <button type="button" id="syncBtn" class="btn btn-primary">Sync to Google Sheets</button>
+            <div id="syncStatus" class="form-status" hidden style="margin-top:20px;"></div>
           </div>
-          <div class="field">
-            <label for="newsFirstPocPhone">Mobile Number</label>
-            <input type="tel" id="newsFirstPocPhone" name="newsFirstPocPhone">
-          </div>
-          <div class="field">
-            <label for="vendorName">Vendor Name</label>
-            <input type="text" id="vendorName" name="vendorName">
-          </div>
-          <div class="field">
-            <label for="vendorPhone">Mobile Number</label>
-            <input type="tel" id="vendorPhone" name="vendorPhone">
-          </div>
+        </section>
 
-          <div class="field">
-            <label for="testDate">Test Date</label>
-            <input type="date" id="testDate" name="testDate">
-            <p class="field-hint">Please fill the test date as provided to the Nava Dishe coordinator.</p>
-          </div>
-
-          <div class="field field-wide">
-            <label for="message">Message / Notes</label>
-            <textarea id="message" name="message" rows="4"></textarea>
-          </div>
-
-          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp-field" aria-hidden="true">
-
-          <div class="field field-wide">
-            <button type="submit" class="btn btn-primary">Save Registration</button>
-          </div>
-        </form>
-
-        <div id="formStatus" class="form-status" hidden aria-live="polite"></div>
-      </div>
-    </section>
-
-    <!-- ===== REGISTRATIONS TAB (dashboard's full form) ===== -->
-    <section id="registrationsTab" class="dash-panel" hidden>
-      <div class="table-toolbar">
-        <input type="search" id="regSearchInput" class="table-search" placeholder="Search contact, phone, district, school…">
-        <select id="regFilterBoard" class="table-filter">
-          <option value="">All Boards</option>
-        </select>
-        <button type="button" id="regRefreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
-        <span id="regRowCount" class="table-count"></span>
-      </div>
-
-      <div id="regTableStatus" class="form-status" hidden></div>
-
-      <div class="table-wrap">
-        <table class="dash-table" id="regTable">
-          <thead>
-            <tr>
-              <th data-sort="Timestamp">Date</th>
-              <th data-sort="_contact">Contact</th>
-              <th data-sort="_phone">Phone</th>
-              <th data-sort="District">District</th>
-              <th data-sort="School Name">School</th>
-              <th data-sort="School Board">Board</th>
-            </tr>
-          </thead>
-          <tbody id="regTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ===== FROM WEBSITE TAB (quick-lead form) ===== -->
-    <section id="leadsTab" class="dash-panel" hidden>
-      <div class="table-toolbar">
-        <input type="search" id="leadSearchInput" class="table-search" placeholder="Search name, phone, district…">
-        <select id="leadFilterCallback" class="table-filter">
-          <option value="">Callback: All</option>
-          <option value="Yes">Callback: Requested</option>
-          <option value="No">Callback: Not requested</option>
-        </select>
-        <button type="button" id="leadRefreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
-        <span id="leadRowCount" class="table-count"></span>
-      </div>
-
-      <div id="leadTableStatus" class="form-status" hidden></div>
-
-      <div class="table-wrap">
-        <table class="dash-table" id="leadTable">
-          <thead>
-            <tr>
-              <th data-sort="Timestamp">Date</th>
-              <th data-sort="Name">Name</th>
-              <th data-sort="District">District</th>
-              <th data-sort="Phone">Phone</th>
-              <th data-sort="Request Callback">Callback</th>
-            </tr>
-          </thead>
-          <tbody id="leadTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
+      </main>
+    </div>
+  </div>
 </div>
 
 <!-- ===== ROW DETAILS OVERLAY ===== -->
