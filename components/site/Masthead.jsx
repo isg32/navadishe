@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '#about', label: 'About' },
@@ -45,11 +46,11 @@ export default function Masthead() {
             <a href="#register" className="btn btn-primary">Register Your School</a>
             <button
               className="burger"
-              aria-label="Open menu"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
             >
-              <span /><span /><span />
+              {menuOpen ? <X size={24} strokeWidth={1.8} /> : <Menu size={24} strokeWidth={1.8} />}
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { X } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 
 export default function DetailOverlay({ row, onClose }) {
@@ -10,7 +11,7 @@ export default function DetailOverlay({ row, onClose }) {
   return (
     <div className="detail-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="detail-card">
-        <button type="button" className="detail-close" aria-label="Close" onClick={onClose}>&times;</button>
+        <button type="button" className="detail-close" aria-label="Close" onClick={onClose}><X size={20} strokeWidth={1.8} /></button>
         <h3>Registration Details</h3>
         <dl className="detail-list">
           {entries.map(([k, v]) => (

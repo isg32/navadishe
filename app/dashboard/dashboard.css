@@ -508,10 +508,11 @@
   right:16px;
   width:32px;
   height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   border:none;
   background:none;
-  font-size:22px;
-  line-height:1;
   cursor:pointer;
   color:var(--ink-soft);
 }
