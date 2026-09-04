@@ -4,3 +4,4 @@
 .vercel
 archive-react-build/node_modules
 archive-react-build/dist
+.env*

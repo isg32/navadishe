@@ -1,8 +1,11 @@
-// Vercel Edge Function — the dashboard's "All Registrations" view reads
-// through here. Requires a valid session cookie (set by api/login.js), then
-// proxies to the Apps Script web app's ?action=list endpoint, passing the
-// server-side SHEET_READ_KEY so the sheet contents stay unreadable to
-// anyone who only has the Apps Script exec URL.
+// Vercel Edge Function — the dashboard's "Registrations" and "From Website"
+// views read through here. Requires a valid session cookie (set by
+// api/login.js), then proxies to the Apps Script web app's ?action=list
+// endpoint for the requested sheet, passing the server-side SHEET_READ_KEY
+// so the sheet contents stay unreadable to anyone who only has the Apps
+// Script exec URL.
+//
+// Query param: ?sheet=website | dashboard (default: dashboard).
 export const config = { runtime: 'edge' };
 
 import { getSession, jsonResponse } from './_session.js';
@@ -19,8 +22,13 @@ export default async function handler(request) {
     return jsonResponse({ result: 'error', error: 'Server is not configured' }, 500);
   }
 
+  const url = new URL(request.url);
+  const sheet = url.searchParams.get('sheet') === 'website' ? 'website' : 'dashboard';
+
   try {
-    const upstream = await fetch(`${scriptUrl}?action=list&key=${encodeURIComponent(readKey)}`);
+    const upstream = await fetch(
+      `${scriptUrl}?action=list&key=${encodeURIComponent(readKey)}&sheet=${sheet}`
+    );
     const text = await upstream.text();
     let parsed;
     try {

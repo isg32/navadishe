@@ -7,30 +7,45 @@ const whoamiUser = document.getElementById('whoamiUser');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const tabs = document.querySelectorAll('.dash-tab');
-const panels = { form: document.getElementById('formTab'), table: document.getElementById('tableTab') };
+const panels = {
+  form: document.getElementById('formTab'),
+  registrations: document.getElementById('registrationsTab'),
+  leads: document.getElementById('leadsTab'),
+};
 
 const registerForm = document.getElementById('registerForm');
 const formStatus = document.getElementById('formStatus');
-
-const searchInput = document.getElementById('searchInput');
-const filterSource = document.getElementById('filterSource');
-const filterCallback = document.getElementById('filterCallback');
-const filterBoard = document.getElementById('filterBoard');
-const refreshBtn = document.getElementById('refreshBtn');
-const rowCount = document.getElementById('rowCount');
-const tableStatus = document.getElementById('tableStatus');
-const tableBody = document.getElementById('leadsTableBody');
-const table = document.getElementById('leadsTable');
 
 const detailOverlay = document.getElementById('detailOverlay');
 const detailList = document.getElementById('detailList');
 const detailClose = document.getElementById('detailClose');
 
-// ===== State =====
-let allRows = [];
-let rowsLoaded = false;
-let sortKey = 'Timestamp';
-let sortDir = 'desc';
+// ===== Helpers shared by both tables =====
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return String(iso);
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) +
+    ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function openDetail(row) {
+  detailList.innerHTML = Object.entries(row)
+    .filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    .map(([k, v]) => {
+      const value = k === 'Timestamp' ? formatDate(v) : v;
+      return `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(value)}</dd>`;
+    }).join('');
+  detailOverlay.hidden = false;
+}
+detailClose.addEventListener('click', () => { detailOverlay.hidden = true; });
+detailOverlay.addEventListener('click', (e) => { if (e.target === detailOverlay) detailOverlay.hidden = true; });
 
 // ===== Auth / view switching =====
 function showLogin() {
@@ -96,8 +111,8 @@ logoutBtn.addEventListener('click', async () => {
   } catch {
     /* ignore network errors on logout */
   }
-  allRows = [];
-  rowsLoaded = false;
+  registrationsTable.reset();
+  leadsTable.reset();
   showLogin();
 });
 
@@ -109,9 +124,8 @@ tabs.forEach((tab) => {
     Object.entries(panels).forEach(([key, panel]) => {
       panel.hidden = key !== tab.dataset.tab;
     });
-    if (tab.dataset.tab === 'table' && !rowsLoaded) {
-      loadLeads();
-    }
+    if (tab.dataset.tab === 'registrations') registrationsTable.ensureLoaded();
+    if (tab.dataset.tab === 'leads') leadsTable.ensureLoaded();
   });
 });
 
@@ -142,7 +156,7 @@ if (registerForm) {
       formStatus.textContent = 'Registration saved. You can enter the next one below.';
       formStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      rowsLoaded = false; // next visit to the table tab should re-fetch
+      registrationsTable.markStale();
     } catch (err) {
       formStatus.hidden = false;
       formStatus.className = 'form-status error';
@@ -154,169 +168,208 @@ if (registerForm) {
   });
 }
 
-// ===== All Registrations table =====
+// ===== Generic table controller =====
+// Handles fetching a sheet's rows through /api/leads?sheet=..., then
+// client-side search/sort/filter/render for that table.
+function createTableController(config) {
+  const {
+    sheetParam,           // 'dashboard' | 'website'
+    searchInput, refreshBtn, countEl, statusEl, tableEl, tableBody,
+    searchGetters,        // (row) => string[]
+    renderRow,             // (row, index) => tbody <tr> HTML string
+    colSpan,
+    defaultSortKey,
+    computed,               // { [computedKey]: (row) => value } for sort keys starting with "_"
+    equalityFilters,       // [{ select, field }] — field is a real row key
+    populateFilter,        // optional (rows) => void, fills a <select>'s dynamic options
+  } = config;
+
+  const state = { rows: [], loaded: false, sortKey: defaultSortKey, sortDir: 'desc' };
+
+  async function load() {
+    statusEl.hidden = true;
+    tableBody.innerHTML = '';
+    countEl.textContent = 'Loading…';
+
+    try {
+      const res = await fetch(`/api/leads?sheet=${sheetParam}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.result !== 'success') {
+        throw new Error(data.error || 'Could not load registrations');
+      }
+      state.rows = data.rows || [];
+      state.loaded = true;
+      if (populateFilter) populateFilter(state.rows);
+      render();
+    } catch (err) {
+      statusEl.hidden = false;
+      statusEl.className = 'form-status error';
+      statusEl.textContent = err.message || 'Could not load registrations.';
+      countEl.textContent = '';
+    }
+  }
+
+  function ensureLoaded() {
+    if (!state.loaded) load();
+  }
+
+  function markStale() {
+    state.loaded = false;
+  }
+
+  function reset() {
+    state.rows = [];
+    state.loaded = false;
+  }
+
+  function getFiltered() {
+    const q = searchInput.value.trim().toLowerCase();
+    return state.rows.filter((row) => {
+      for (const { select, field } of equalityFilters) {
+        if (select.value && row[field] !== select.value) return false;
+      }
+      if (q) {
+        const haystack = searchGetters(row).join(' ').toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function sortRows(rows) {
+    const key = state.sortKey;
+    const dir = state.sortDir === 'asc' ? 1 : -1;
+    return rows.slice().sort((a, b) => {
+      let av = key.startsWith('_') ? computed[key](a) : a[key];
+      let bv = key.startsWith('_') ? computed[key](b) : b[key];
+
+      if (key === 'Timestamp') {
+        av = av ? new Date(av).getTime() : 0;
+        bv = bv ? new Date(bv).getTime() : 0;
+        return (av - bv) * dir;
+      }
+      av = (av || '').toString().toLowerCase();
+      bv = (bv || '').toString().toLowerCase();
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }
+
+  function render() {
+    const rows = sortRows(getFiltered());
+    countEl.textContent = `${rows.length} of ${state.rows.length}`;
+
+    tableEl.querySelectorAll('thead th').forEach((th) => {
+      th.classList.toggle('is-sorted', th.dataset.sort === state.sortKey && state.sortDir === 'asc');
+      th.classList.toggle('is-sorted-desc', th.dataset.sort === state.sortKey && state.sortDir === 'desc');
+    });
+
+    if (rows.length === 0) {
+      tableBody.innerHTML = `<tr class="table-empty-row"><td colspan="${colSpan}">No registrations match your filters.</td></tr>`;
+      return;
+    }
+
+    tableBody.innerHTML = rows.map((row) => renderRow(row, state.rows.indexOf(row))).join('');
+  }
+
+  tableBody.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr[data-index]');
+    if (!tr) return;
+    const row = state.rows[Number(tr.dataset.index)];
+    if (row) openDetail(row);
+  });
+
+  tableEl.querySelectorAll('thead th').forEach((th) => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sort;
+      if (state.sortKey === key) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortKey = key;
+        state.sortDir = 'asc';
+      }
+      render();
+    });
+  });
+
+  searchInput.addEventListener('input', render);
+  equalityFilters.forEach(({ select }) => select.addEventListener('change', render));
+  refreshBtn.addEventListener('click', load);
+
+  return { ensureLoaded, markStale, reset };
+}
+
+// ===== "Registrations" table (dashboard's full form) =====
 function computeContact(row) {
-  return row['Name'] || row['Principal Name'] || row['Coordinator Name'] || row['School Name'] || '—';
+  return row['Principal Name'] || row['Coordinator Name'] || row['School Name'] || '—';
 }
 function computePhone(row) {
-  return row['Phone'] || row['Principal Mobile Number'] || row['School Contact Number'] || row['Coordinator Mobile Number'] || '—';
+  return row['Principal Mobile Number'] || row['School Contact Number'] || row['Coordinator Mobile Number'] || '—';
 }
 
-async function loadLeads() {
-  tableStatus.hidden = true;
-  tableBody.innerHTML = '';
-  rowCount.textContent = 'Loading…';
+const regFilterBoard = document.getElementById('regFilterBoard');
 
-  try {
-    const res = await fetch('/api/leads');
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.result !== 'success') {
-      throw new Error(data.error || 'Could not load registrations');
-    }
-    allRows = data.rows || [];
-    rowsLoaded = true;
-    populateBoardFilter();
-    renderTable();
-  } catch (err) {
-    tableStatus.hidden = false;
-    tableStatus.className = 'form-status error';
-    tableStatus.textContent = err.message || 'Could not load registrations.';
-    rowCount.textContent = '';
-  }
-}
+const registrationsTable = createTableController({
+  sheetParam: 'dashboard',
+  searchInput: document.getElementById('regSearchInput'),
+  refreshBtn: document.getElementById('regRefreshBtn'),
+  countEl: document.getElementById('regRowCount'),
+  statusEl: document.getElementById('regTableStatus'),
+  tableEl: document.getElementById('regTable'),
+  tableBody: document.getElementById('regTableBody'),
+  colSpan: 6,
+  defaultSortKey: 'Timestamp',
+  computed: { _contact: computeContact, _phone: computePhone },
+  searchGetters: (row) => [
+    computeContact(row), computePhone(row), row['District'], row['School Name'],
+    row['School Email Id'], row['Principal Name'], row['Coordinator Name'], row['Message'],
+  ],
+  equalityFilters: [{ select: regFilterBoard, field: 'School Board' }],
+  populateFilter: (rows) => {
+    const boards = Array.from(new Set(rows.map((r) => r['School Board']).filter(Boolean))).sort();
+    const current = regFilterBoard.value;
+    regFilterBoard.innerHTML = '<option value="">All Boards</option>' +
+      boards.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+    regFilterBoard.value = boards.includes(current) ? current : '';
+  },
+  renderRow: (row, index) => `<tr data-index="${index}">
+    <td>${escapeHtml(formatDate(row['Timestamp']))}</td>
+    <td>${escapeHtml(computeContact(row))}</td>
+    <td>${escapeHtml(computePhone(row))}</td>
+    <td>${escapeHtml(row['District'] || '—')}</td>
+    <td>${escapeHtml(row['School Name'] || '—')}</td>
+    <td>${escapeHtml(row['School Board'] || '—')}</td>
+  </tr>`,
+});
 
-function populateBoardFilter() {
-  const boards = Array.from(new Set(allRows.map((r) => r['School Board']).filter(Boolean))).sort();
-  const current = filterBoard.value;
-  filterBoard.innerHTML = '<option value="">All Boards</option>' +
-    boards.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
-  filterBoard.value = boards.includes(current) ? current : '';
-}
+// ===== "From Website" table (quick-lead form) =====
+const leadFilterCallback = document.getElementById('leadFilterCallback');
 
-function getRowsFiltered() {
-  const q = searchInput.value.trim().toLowerCase();
-  const src = filterSource.value;
-  const cb = filterCallback.value;
-  const board = filterBoard.value;
-
-  return allRows.filter((row) => {
-    if (src && row['Source'] !== src) return false;
-    if (cb && row['Request Callback'] !== cb) return false;
-    if (board && row['School Board'] !== board) return false;
-    if (q) {
-      const haystack = [
-        computeContact(row), computePhone(row), row['District'], row['School Name'],
-        row['School Email Id'], row['Principal Name'], row['Coordinator Name'], row['Message'],
-      ].join(' ').toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-    return true;
-  });
-}
-
-function sortRows(rows) {
-  const key = sortKey;
-  const dir = sortDir === 'asc' ? 1 : -1;
-  return rows.slice().sort((a, b) => {
-    let av, bv;
-    if (key === '_contact') { av = computeContact(a); bv = computeContact(b); }
-    else if (key === '_phone') { av = computePhone(a); bv = computePhone(b); }
-    else { av = a[key]; bv = b[key]; }
-
-    if (key === 'Timestamp') {
-      av = av ? new Date(av).getTime() : 0;
-      bv = bv ? new Date(bv).getTime() : 0;
-      return (av - bv) * dir;
-    }
-    av = (av || '').toString().toLowerCase();
-    bv = (bv || '').toString().toLowerCase();
-    if (av < bv) return -1 * dir;
-    if (av > bv) return 1 * dir;
-    return 0;
-  });
-}
-
-function formatDate(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return String(iso);
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) +
-    ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
-}
-
-function renderTable() {
-  const rows = sortRows(getRowsFiltered());
-  rowCount.textContent = `${rows.length} of ${allRows.length}`;
-
-  document.querySelectorAll('.dash-table thead th').forEach((th) => {
-    th.classList.toggle('is-sorted', th.dataset.sort === sortKey && sortDir === 'asc');
-    th.classList.toggle('is-sorted-desc', th.dataset.sort === sortKey && sortDir === 'desc');
-  });
-
-  if (rows.length === 0) {
-    tableBody.innerHTML = '<tr class="table-empty-row"><td colspan="8">No registrations match your filters.</td></tr>';
-    return;
-  }
-
-  tableBody.innerHTML = rows.map((row, i) => {
-    const sourceClass = row['Source'] === 'Dashboard' ? 'badge-dashboard' : 'badge-website';
+const leadsTable = createTableController({
+  sheetParam: 'website',
+  searchInput: document.getElementById('leadSearchInput'),
+  refreshBtn: document.getElementById('leadRefreshBtn'),
+  countEl: document.getElementById('leadRowCount'),
+  statusEl: document.getElementById('leadTableStatus'),
+  tableEl: document.getElementById('leadTable'),
+  tableBody: document.getElementById('leadTableBody'),
+  colSpan: 5,
+  defaultSortKey: 'Timestamp',
+  computed: {},
+  searchGetters: (row) => [row['Name'], row['District'], row['Phone']],
+  equalityFilters: [{ select: leadFilterCallback, field: 'Request Callback' }],
+  renderRow: (row, index) => {
     const cbClass = row['Request Callback'] === 'Yes' ? 'badge-yes' : 'badge-no';
-    return `<tr data-index="${allRows.indexOf(row)}">
+    return `<tr data-index="${index}">
       <td>${escapeHtml(formatDate(row['Timestamp']))}</td>
-      <td><span class="badge ${sourceClass}">${escapeHtml(row['Source'] || '—')}</span></td>
-      <td>${escapeHtml(computeContact(row))}</td>
-      <td>${escapeHtml(computePhone(row))}</td>
+      <td>${escapeHtml(row['Name'] || '—')}</td>
       <td>${escapeHtml(row['District'] || '—')}</td>
-      <td>${escapeHtml(row['School Name'] || '—')}</td>
-      <td>${escapeHtml(row['School Board'] || '—')}</td>
+      <td>${escapeHtml(row['Phone'] || '—')}</td>
       <td><span class="badge ${cbClass}">${escapeHtml(row['Request Callback'] || 'No')}</span></td>
     </tr>`;
-  }).join('');
-}
-
-tableBody.addEventListener('click', (e) => {
-  const tr = e.target.closest('tr[data-index]');
-  if (!tr) return;
-  const row = allRows[Number(tr.dataset.index)];
-  if (row) openDetail(row);
+  },
 });
-
-function openDetail(row) {
-  detailList.innerHTML = Object.entries(row)
-    .filter(([, v]) => v !== '' && v !== null && v !== undefined)
-    .map(([k, v]) => {
-      const value = k === 'Timestamp' ? formatDate(v) : v;
-      return `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(value)}</dd>`;
-    }).join('');
-  detailOverlay.hidden = false;
-}
-detailClose.addEventListener('click', () => { detailOverlay.hidden = true; });
-detailOverlay.addEventListener('click', (e) => { if (e.target === detailOverlay) detailOverlay.hidden = true; });
-
-table.querySelectorAll('thead th').forEach((th) => {
-  th.addEventListener('click', () => {
-    const key = th.dataset.sort;
-    if (sortKey === key) {
-      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-      sortKey = key;
-      sortDir = 'asc';
-    }
-    renderTable();
-  });
-});
-
-[searchInput, filterSource, filterCallback, filterBoard].forEach((el) => {
-  el.addEventListener('input', renderTable);
-  el.addEventListener('change', renderTable);
-});
-refreshBtn.addEventListener('click', loadLeads);
 
 // ===== Init =====
 checkSession();

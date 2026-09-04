@@ -48,7 +48,8 @@
   <nav class="dash-tabs">
     <div class="wrap dash-tabs-wrap">
       <button type="button" class="dash-tab is-active" data-tab="form">New Registration</button>
-      <button type="button" class="dash-tab" data-tab="table">All Registrations</button>
+      <button type="button" class="dash-tab" data-tab="registrations">Registrations</button>
+      <button type="button" class="dash-tab" data-tab="leads">From Website</button>
     </div>
   </nav>
 
@@ -62,7 +63,7 @@
             <div class="eyebrow">Staff Entry</div>
             <h2>New School<br>Registration</h2>
           </div>
-          <p>Full registration details, same as the Disha registration form. Submissions land in the same sheet as the website's quick-lead form.</p>
+          <p>Full registration details, same as the Disha registration form. Saves to the "School Registrations" sheet — separate from the website's quick-lead form.</p>
         </div>
 
         <form id="registerForm" class="register-form">
@@ -203,44 +204,63 @@
       </div>
     </section>
 
-    <!-- ===== TABLE TAB ===== -->
-    <section id="tableTab" class="dash-panel" hidden>
+    <!-- ===== REGISTRATIONS TAB (dashboard's full form) ===== -->
+    <section id="registrationsTab" class="dash-panel" hidden>
       <div class="table-toolbar">
-        <input type="search" id="searchInput" class="table-search" placeholder="Search name, phone, district, school…">
-        <select id="filterSource" class="table-filter">
-          <option value="">All Sources</option>
-          <option value="Website">Website</option>
-          <option value="Dashboard">Dashboard</option>
-        </select>
-        <select id="filterCallback" class="table-filter">
-          <option value="">Callback: All</option>
-          <option value="Yes">Callback: Requested</option>
-          <option value="No">Callback: Not requested</option>
-        </select>
-        <select id="filterBoard" class="table-filter">
+        <input type="search" id="regSearchInput" class="table-search" placeholder="Search contact, phone, district, school…">
+        <select id="regFilterBoard" class="table-filter">
           <option value="">All Boards</option>
         </select>
-        <button type="button" id="refreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
-        <span id="rowCount" class="table-count"></span>
+        <button type="button" id="regRefreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
+        <span id="regRowCount" class="table-count"></span>
       </div>
 
-      <div id="tableStatus" class="form-status" hidden></div>
+      <div id="regTableStatus" class="form-status" hidden></div>
 
       <div class="table-wrap">
-        <table class="dash-table" id="leadsTable">
+        <table class="dash-table" id="regTable">
           <thead>
             <tr>
               <th data-sort="Timestamp">Date</th>
-              <th data-sort="Source">Source</th>
               <th data-sort="_contact">Contact</th>
               <th data-sort="_phone">Phone</th>
               <th data-sort="District">District</th>
               <th data-sort="School Name">School</th>
               <th data-sort="School Board">Board</th>
+            </tr>
+          </thead>
+          <tbody id="regTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== FROM WEBSITE TAB (quick-lead form) ===== -->
+    <section id="leadsTab" class="dash-panel" hidden>
+      <div class="table-toolbar">
+        <input type="search" id="leadSearchInput" class="table-search" placeholder="Search name, phone, district…">
+        <select id="leadFilterCallback" class="table-filter">
+          <option value="">Callback: All</option>
+          <option value="Yes">Callback: Requested</option>
+          <option value="No">Callback: Not requested</option>
+        </select>
+        <button type="button" id="leadRefreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
+        <span id="leadRowCount" class="table-count"></span>
+      </div>
+
+      <div id="leadTableStatus" class="form-status" hidden></div>
+
+      <div class="table-wrap">
+        <table class="dash-table" id="leadTable">
+          <thead>
+            <tr>
+              <th data-sort="Timestamp">Date</th>
+              <th data-sort="Name">Name</th>
+              <th data-sort="District">District</th>
+              <th data-sort="Phone">Phone</th>
               <th data-sort="Request Callback">Callback</th>
             </tr>
           </thead>
-          <tbody id="leadsTableBody"></tbody>
+          <tbody id="leadTableBody"></tbody>
         </table>
       </div>
     </section>

@@ -1,11 +1,13 @@
-// Shared column order for the "Registrations" sheet. Both the public quick-lead
-// form (index.html) and the internal dashboard's full registration form
-// (dashboard.html) write into this same sheet/tab — each just leaves whatever
-// columns don't apply to it blank.
-var HEADERS = [
-  'Timestamp', 'Source', 'Name', 'District', 'Phone', 'Request Callback',
-  'School Name', 'School Address', 'City', 'State', 'Pin-code', 'School Board', 'Branch Name',
-  'School Contact Number', 'School Email Id',
+// Two separate sheet tabs, one per form:
+// - "Website Leads": the public quick-lead form (index.html) — Name, District, Phone, callback.
+// - "School Registrations": the dashboard's full Disha-style form (dashboard.html).
+var WEBSITE_SHEET_NAME = 'Website Leads';
+var WEBSITE_HEADERS = ['Timestamp', 'Name', 'District', 'Phone', 'Request Callback'];
+
+var DASHBOARD_SHEET_NAME = 'School Registrations';
+var DASHBOARD_HEADERS = [
+  'Timestamp', 'School Name', 'School Address', 'City', 'District', 'State', 'Pin-code',
+  'School Board', 'Branch Name', 'School Contact Number', 'School Email Id',
   'Principal Name', 'Principal Mobile Number', 'Principal Email Id',
   'Coordinator Name', 'Coordinator Mobile Number', 'Coordinator Email Id',
   'Students Class 1st-9th', 'Students Class 10th', 'Students Class 11th', 'Students Class 12th',
@@ -14,21 +16,66 @@ var HEADERS = [
   'Message'
 ];
 
-function getSheet_() {
+function getOrCreateSheet_(name, headers) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Registrations');
+  var sheet = ss.getSheetByName(name);
   if (!sheet) {
-    sheet = ss.insertSheet('Registrations');
+    sheet = ss.insertSheet(name);
   }
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(HEADERS);
+    sheet.appendRow(headers);
   }
   return sheet;
 }
 
+function appendWebsiteRow_(p) {
+  var sheet = getOrCreateSheet_(WEBSITE_SHEET_NAME, WEBSITE_HEADERS);
+  var row = {
+    'Timestamp': new Date(),
+    'Name': p.name || '',
+    'District': p.district || '',
+    'Phone': p.phone || '',
+    'Request Callback': p.requestCallback ? 'Yes' : 'No'
+  };
+  sheet.appendRow(WEBSITE_HEADERS.map(function (h) { return row[h]; }));
+}
+
+function appendDashboardRow_(p) {
+  var sheet = getOrCreateSheet_(DASHBOARD_SHEET_NAME, DASHBOARD_HEADERS);
+  var row = {
+    'Timestamp': new Date(),
+    'School Name': p.schoolName || '',
+    'School Address': p.schoolAddress || '',
+    'City': p.city || '',
+    'District': p.district || '',
+    'State': p.state || '',
+    'Pin-code': p.pincode || '',
+    'School Board': p.board || '',
+    'Branch Name': p.branchName || '',
+    'School Contact Number': p.schoolPhone || '',
+    'School Email Id': p.schoolEmail || '',
+    'Principal Name': p.principalName || '',
+    'Principal Mobile Number': p.principalPhone || '',
+    'Principal Email Id': p.principalEmail || '',
+    'Coordinator Name': p.coordinatorName || '',
+    'Coordinator Mobile Number': p.coordinatorPhone || '',
+    'Coordinator Email Id': p.coordinatorEmail || '',
+    'Students Class 1st-9th': p.studentsClass1to9 || '',
+    'Students Class 10th': p.studentsClass10 || '',
+    'Students Class 11th': p.studentsClass11 || '',
+    'Students Class 12th': p.studentsClass12 || '',
+    'News First POC Name': p.newsFirstPocName || '',
+    'News First POC Mobile Number': p.newsFirstPocPhone || '',
+    'Vendor Name': p.vendorName || '',
+    'Vendor Mobile Number': p.vendorPhone || '',
+    'Test Date': p.testDate || '',
+    'Message': p.message || ''
+  };
+  sheet.appendRow(DASHBOARD_HEADERS.map(function (h) { return row[h]; }));
+}
+
 function doPost(e) {
   try {
-    var sheet = getSheet_();
     var p = e.parameter;
 
     // Ignore bot submissions caught by the honeypot field
@@ -36,41 +83,11 @@ function doPost(e) {
       return jsonOutput_({ result: 'ignored' });
     }
 
-    var row = {
-      'Timestamp': new Date(),
-      'Source': p.source || 'Website',
-      'Name': p.name || '',
-      'District': p.district || '',
-      'Phone': p.phone || '',
-      'Request Callback': p.requestCallback ? 'Yes' : 'No',
-      'School Name': p.schoolName || '',
-      'School Address': p.schoolAddress || '',
-      'City': p.city || '',
-      'State': p.state || '',
-      'Pin-code': p.pincode || '',
-      'School Board': p.board || '',
-      'Branch Name': p.branchName || '',
-      'School Contact Number': p.schoolPhone || '',
-      'School Email Id': p.schoolEmail || '',
-      'Principal Name': p.principalName || '',
-      'Principal Mobile Number': p.principalPhone || '',
-      'Principal Email Id': p.principalEmail || '',
-      'Coordinator Name': p.coordinatorName || '',
-      'Coordinator Mobile Number': p.coordinatorPhone || '',
-      'Coordinator Email Id': p.coordinatorEmail || '',
-      'Students Class 1st-9th': p.studentsClass1to9 || '',
-      'Students Class 10th': p.studentsClass10 || '',
-      'Students Class 11th': p.studentsClass11 || '',
-      'Students Class 12th': p.studentsClass12 || '',
-      'News First POC Name': p.newsFirstPocName || '',
-      'News First POC Mobile Number': p.newsFirstPocPhone || '',
-      'Vendor Name': p.vendorName || '',
-      'Vendor Mobile Number': p.vendorPhone || '',
-      'Test Date': p.testDate || '',
-      'Message': p.message || ''
-    };
-
-    sheet.appendRow(HEADERS.map(function (h) { return row[h]; }));
+    if (p.source === 'Dashboard') {
+      appendDashboardRow_(p);
+    } else {
+      appendWebsiteRow_(p);
+    }
 
     return jsonOutput_({ result: 'success' });
 
@@ -81,11 +98,11 @@ function doPost(e) {
 
 // GET with no params: lets you sanity-check the deployment by visiting the
 // web app URL directly in a browser.
-// GET with ?action=list&key=<READ_KEY>: returns every row as JSON for the
-// dashboard's "All Registrations" view. READ_KEY is a Script Property (set it
-// under Project Settings -> Script properties) — it must match the
-// SHEET_READ_KEY env var the Vercel proxy (api/leads.js) sends, so the sheet
-// contents can't be read by anyone who merely has the deployed exec URL.
+// GET with ?action=list&key=<READ_KEY>&sheet=website|dashboard: returns every
+// row of the requested sheet as JSON, for the dashboard's list views.
+// READ_KEY is a Script Property (Project Settings -> Script properties) — it
+// must match the SHEET_READ_KEY env var the Vercel proxy (api/leads.js)
+// sends, so the sheets can't be read by anyone who merely has the exec URL.
 function doGet(e) {
   var params = (e && e.parameter) || {};
 
@@ -102,7 +119,11 @@ function handleList_(params) {
     return jsonOutput_({ result: 'error', error: 'Unauthorized' });
   }
 
-  var sheet = getSheet_();
+  var isWebsite = params.sheet === 'website';
+  var name = isWebsite ? WEBSITE_SHEET_NAME : DASHBOARD_SHEET_NAME;
+  var defaultHeaders = isWebsite ? WEBSITE_HEADERS : DASHBOARD_HEADERS;
+  var sheet = getOrCreateSheet_(name, defaultHeaders);
+
   var lastRow = sheet.getLastRow();
   var lastCol = sheet.getLastColumn();
   if (lastRow < 2) {

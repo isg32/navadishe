@@ -1,9 +1,9 @@
 # Nava Dishe — Setup
 
-A single-page marketing site for **Nava Dishe**, presented by News First, plus a login-gated internal **dashboard** (`dashboard.html`) for staff. Both write into the same Google Sheet via a Google Apps Script web app:
+A single-page marketing site for **Nava Dishe**, presented by News First, plus a login-gated internal **dashboard** (`dashboard.html`) for staff. Both write into the same Google Sheet (via a Google Apps Script web app), but into two separate tabs:
 
-- `index.html` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback".
-- `dashboard.html` — staff-only. After signing in, staff can (1) fill in the full Disha-style registration form once a school is confirmed, and (2) search/sort/filter every registration — from both the website and the dashboard — in one table.
+- `index.html` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback". Rows land in the **"Website Leads"** sheet tab.
+- `dashboard.html` — staff-only. After signing in, staff can (1) fill in the full Disha-style registration form once a school is confirmed — rows land in the **"School Registrations"** sheet tab — and (2) search/sort/filter each of those two tabs in its own table.
 
 None of the following are ever visible to a browser: the Apps Script URL, the dashboard login credentials, or the session-signing secret. Each is read server-side by a Vercel Edge Function from an environment variable.
 
@@ -45,7 +45,7 @@ If you just want to preview the static pages, `python3 -m http.server` also work
 7. Click Deploy, and authorize the script when prompted (you'll see an "unverified app" warning — click Advanced → Go to [project name] → Allow; this is expected for your own script).
 8. In the Apps Script editor, go to Project Settings → Script properties → Add script property. Add one named `READ_KEY`, with the **same value** as `SHEET_READ_KEY` in your `.env.local` / Vercel env vars. This is what stops anyone who merely finds the Apps Script URL from reading your data — only requests carrying the matching key can list rows.
 9. Copy the Web app URL you're given — this is the value that goes into `APPS_SCRIPT_URL`, never into a committed file.
-10. Submit a test entry from the live site and confirm a new row appears in the "Registrations" tab of your sheet.
+10. Submit a test entry from the live site and confirm a new row appears in the "Website Leads" tab, and a dashboard entry appears in "School Registrations" — both tabs are created automatically the first time each form is used.
 
 Whenever you edit `Code.gs` later, you must go to Deploy → Manage deployments → Edit (pencil icon) → New version → Deploy for the changes to go live — saving the script alone does not update the deployed web app.
 
@@ -53,8 +53,9 @@ Whenever you edit `Code.gs` later, you must go to Deploy → Manage deployments 
 
 Visit `/dashboard.html` and sign in with one of the `DASHBOARD_USERS` credentials. Nothing under it is indexed by search engines (`<meta name="robots" content="noindex, nofollow">`), but it isn't linked from the public site either — share the URL directly with staff.
 
-- **New Registration** — the full form (school, principal, coordinator, student strength, News First/vendor coordination, test date). Saves to the same "Registrations" sheet tab as the website, tagged `Source: Dashboard`. The form resets after each save so staff can enter several schools in a row.
-- **All Registrations** — every row from the sheet (both `Website` and `Dashboard` sources), with free-text search, column sorting, and filters for source/callback-requested/board. Click a row for its full details.
+- **New Registration** — the full form (school, principal, coordinator, student strength, News First/vendor coordination, test date). Saves to the "School Registrations" sheet tab. The form resets after each save so staff can enter several schools in a row.
+- **Registrations** — every row from "School Registrations", with free-text search, column sorting, and a board filter. Click a row for its full details.
+- **From Website** — every row from "Website Leads" (the public quick-lead form), with free-text search, column sorting, and a callback-requested filter.
 
 ## 5. Project structure
 
@@ -69,7 +70,7 @@ api/register.js              Vercel Edge Function — proxies form POSTs, keeps 
 api/login.js                 Vercel Edge Function — checks DASHBOARD_USERS, issues a signed session cookie
 api/logout.js                Vercel Edge Function — clears the session cookie
 api/whoami.js                Vercel Edge Function — lets dashboard.html check for an existing session on load
-api/leads.js                 Vercel Edge Function — session-gated proxy that lists sheet rows for the table
+api/leads.js                 Vercel Edge Function — session-gated proxy that lists rows for either sheet tab (?sheet=website|dashboard)
 api/_session.js              Shared HMAC session-signing helpers used by the four api/*.js above
 images/                      Stock photography (Pexels, free license) + favicon.svg
 apps-script/Code.gs           Google Apps Script source — paste into script.google.com
