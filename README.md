@@ -1,28 +1,40 @@
 # Nava Dishe — Setup
 
-A single-page marketing site for **Nava Dishe**, presented by News First — static HTML/CSS/vanilla JS, plus one small serverless function. Ends in a school registration form that writes submissions into a Google Sheet via a Google Apps Script web app.
+A single-page marketing site for **Nava Dishe**, presented by News First, plus a login-gated internal **dashboard** (`dashboard.html`) for staff. Both write into the same Google Sheet via a Google Apps Script web app:
 
-The Apps Script web app URL is a credential the browser must never see, so it's kept server-side: `api/register.js` (a Vercel Edge Function) reads it from an environment variable and proxies the form submission. The client only ever talks to `/api/register` on your own domain — the real URL never appears in any file that ships to the browser.
+- `index.html` — the public site. Its registration section is a quick lead form: Name, District, Phone, "request a callback".
+- `dashboard.html` — staff-only. After signing in, staff can (1) fill in the full Disha-style registration form once a school is confirmed, and (2) search/sort/filter every registration — from both the website and the dashboard — in one table.
+
+None of the following are ever visible to a browser: the Apps Script URL, the dashboard login credentials, or the session-signing secret. Each is read server-side by a Vercel Edge Function from an environment variable.
 
 ## 1. Deploying to Vercel
 
 1. Push this project to a Git repo and import it into Vercel (or run `vercel` from this directory).
-2. In Vercel → Project Settings → Environment Variables, add `APPS_SCRIPT_URL` with your deployed Apps Script web app URL (see §2 below for how to get one).
-3. Deploy. Vercel auto-detects `index.html`/`css`/`js`/`images` as static output and `api/register.js` as a serverless function — no build command or `vercel.json` needed.
+2. In Vercel → Project Settings → Environment Variables, add the four variables described in §2 below.
+3. Deploy. Vercel auto-detects `index.html`/`dashboard.html`/`css`/`js`/`images` as static output and everything under `api/` as serverless functions — no build command or `vercel.json` needed.
 
-## 2. Running locally
+## 2. Environment variables
+
+Copy `.env.example` to `.env.local` for local testing, and set the same four in Vercel for production:
+
+| Variable | What it's for |
+|---|---|
+| `APPS_SCRIPT_URL` | Your deployed Apps Script web app URL (§3). |
+| `DASHBOARD_USERS` | A JSON object of dashboard logins, e.g. `{"admin":"a-real-password","priya":"another-password"}`. Add or remove staff by editing this — no code changes. |
+| `SESSION_SECRET` | A long random string used to sign the dashboard's login session cookie. Generate one with `openssl rand -hex 32`. |
+| `SHEET_READ_KEY` | A long random string that lets the dashboard *read* sheet rows. Must exactly match a Script Property of the same name in the Apps Script project (§3, step 8). |
 
 ```bash
 cp .env.example .env.local
-# edit .env.local and paste your real Apps Script URL in place of the placeholder
+# fill in real values, then:
 vercel dev
 ```
 
-`vercel dev` serves the static site and runs `api/register.js` locally, reading `APPS_SCRIPT_URL` from `.env.local`. `.env.local` is git-ignored — never commit it.
+`vercel dev` serves the static site and runs everything under `api/` locally. `.env.local` is git-ignored — never commit it.
 
-If you just want to preview the static pages without the form working, you can instead run `python3 -m http.server` — but the registration form's POST to `/api/register` will 404 without `vercel dev` or a real Vercel deployment behind it.
+If you just want to preview the static pages, `python3 -m http.server` also works — but the registration form and the whole dashboard need `vercel dev` (or a real deployment) since they depend on the `api/` functions.
 
-## 3. Connect the registration form to Google Sheets
+## 3. Connect it to Google Sheets
 
 1. Go to https://sheets.google.com and create a new spreadsheet — name it e.g. "Nava Dishe Registrations".
 2. In the sheet, go to Extensions → Apps Script.
@@ -31,23 +43,39 @@ If you just want to preview the static pages without the form working, you can i
 5. Click the gear icon next to "Select type" → choose Web app.
 6. Set "Execute as" to Me, and "Who has access" to Anyone.
 7. Click Deploy, and authorize the script when prompted (you'll see an "unverified app" warning — click Advanced → Go to [project name] → Allow; this is expected for your own script).
-8. Copy the Web app URL you're given — this is the value that goes into `APPS_SCRIPT_URL` (§1 and §2 above), never into a committed file.
-9. Submit a test entry from the live form and confirm a new row appears in the "Registrations" tab of your sheet.
+8. In the Apps Script editor, go to Project Settings → Script properties → Add script property. Add one named `READ_KEY`, with the **same value** as `SHEET_READ_KEY` in your `.env.local` / Vercel env vars. This is what stops anyone who merely finds the Apps Script URL from reading your data — only requests carrying the matching key can list rows.
+9. Copy the Web app URL you're given — this is the value that goes into `APPS_SCRIPT_URL`, never into a committed file.
+10. Submit a test entry from the live site and confirm a new row appears in the "Registrations" tab of your sheet.
 
-Whenever you edit Code.gs later, you must go to Deploy → Manage deployments → Edit (pencil icon) → New version → Deploy for the changes to go live — saving the script alone does not update the deployed web app.
+Whenever you edit `Code.gs` later, you must go to Deploy → Manage deployments → Edit (pencil icon) → New version → Deploy for the changes to go live — saving the script alone does not update the deployed web app.
 
-## 4. Project structure
+## 4. Using the dashboard
+
+Visit `/dashboard.html` and sign in with one of the `DASHBOARD_USERS` credentials. Nothing under it is indexed by search engines (`<meta name="robots" content="noindex, nofollow">`), but it isn't linked from the public site either — share the URL directly with staff.
+
+- **New Registration** — the full form (school, principal, coordinator, student strength, News First/vendor coordination, test date). Saves to the same "Registrations" sheet tab as the website, tagged `Source: Dashboard`. The form resets after each save so staff can enter several schools in a row.
+- **All Registrations** — every row from the sheet (both `Website` and `Dashboard` sources), with free-text search, column sorting, and filters for source/callback-requested/board. Click a row for its full details.
+
+## 5. Project structure
 
 ```
-index.html              The whole page — structure and copy
-css/styles.css           All styling (colors, type, layout, responsive rules)
-js/main.js                Mobile menu, scroll-reveal, registration form submit handler
-api/register.js           Vercel Edge Function — proxies the form POST, keeps APPS_SCRIPT_URL server-side
-images/                   Stock photography (Pexels, free license) + favicon.svg
-apps-script/Code.gs        Google Apps Script source — paste into script.google.com
-.env.example               Template for the local .env.local (git-ignored)
+index.html                The public site — structure and copy
+dashboard.html             Staff dashboard — login, entry form, and registrations table
+css/styles.css              Shared styling (colors, type, layout, responsive rules)
+css/dashboard.css           Dashboard-only styling (login card, tabs, table)
+js/main.js                   Mobile menu, scroll-reveal, public quick-lead form submit
+js/dashboard.js              Login, tab switching, entry form submit, table search/sort/filter
+api/register.js              Vercel Edge Function — proxies form POSTs, keeps APPS_SCRIPT_URL server-side
+api/login.js                 Vercel Edge Function — checks DASHBOARD_USERS, issues a signed session cookie
+api/logout.js                Vercel Edge Function — clears the session cookie
+api/whoami.js                Vercel Edge Function — lets dashboard.html check for an existing session on load
+api/leads.js                 Vercel Edge Function — session-gated proxy that lists sheet rows for the table
+api/_session.js              Shared HMAC session-signing helpers used by the four api/*.js above
+images/                      Stock photography (Pexels, free license) + favicon.svg
+apps-script/Code.gs           Google Apps Script source — paste into script.google.com
+.env.example                  Template for the local .env.local (git-ignored)
 ```
 
-## 5. Image credits
+## 6. Image credits
 
 Photography sourced from [Pexels](https://www.pexels.com) under the Pexels License (free for commercial use, no attribution required).

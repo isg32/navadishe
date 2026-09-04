@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nava Dishe — Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="dashboard-body">
+
+<!-- ===== LOGIN ===== -->
+<div id="loginView" class="login-view">
+  <form id="loginForm" class="login-card">
+    <div class="brand-word login-brand">Nava Dishe</div>
+    <p class="login-sub">Staff dashboard — sign in to continue.</p>
+
+    <div id="loginStatus" class="form-status error" hidden></div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" autocomplete="username" required aria-required="true">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required aria-required="true">
+    </div>
+
+    <button type="submit" class="btn btn-primary login-btn">Sign In</button>
+  </form>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboardView" class="dashboard-view" hidden>
+  <header class="dash-header">
+    <div class="brand-word">Nava Dishe</div>
+    <div class="dash-header-right">
+      <span class="dash-user">Signed in as <strong id="whoamiUser"></strong></span>
+      <button id="logoutBtn" class="btn btn-ghost dash-logout">Log Out</button>
+    </div>
+  </header>
+
+  <nav class="dash-tabs">
+    <div class="wrap dash-tabs-wrap">
+      <button type="button" class="dash-tab is-active" data-tab="form">New Registration</button>
+      <button type="button" class="dash-tab" data-tab="table">All Registrations</button>
+    </div>
+  </nav>
+
+  <main class="wrap dash-main">
+
+    <!-- ===== FORM TAB ===== -->
+    <section id="formTab" class="dash-panel">
+      <div class="register-panel">
+        <div class="section-head" style="margin-bottom:32px;">
+          <div>
+            <div class="eyebrow">Staff Entry</div>
+            <h2>New School<br>Registration</h2>
+          </div>
+          <p>Full registration details, same as the Disha registration form. Submissions land in the same sheet as the website's quick-lead form.</p>
+        </div>
+
+        <form id="registerForm" class="register-form">
+          <input type="hidden" name="source" value="Dashboard">
+
+          <div class="field field-wide">
+            <label for="schoolName">School Name <span class="req">*</span></label>
+            <input type="text" id="schoolName" name="schoolName" required aria-required="true">
+          </div>
+          <div class="field field-wide">
+            <label for="schoolAddress">School Address <span class="req">*</span></label>
+            <input type="text" id="schoolAddress" name="schoolAddress" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="city">City <span class="req">*</span></label>
+            <input type="text" id="city" name="city" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="district">District <span class="req">*</span></label>
+            <input type="text" id="district" name="district" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="state">State <span class="req">*</span></label>
+            <input type="text" id="state" name="state" value="Karnataka" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="pincode">Pin-code <span class="req">*</span></label>
+            <input type="text" id="pincode" name="pincode" inputmode="numeric" pattern="[0-9]{6}" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="board">School Board <span class="req">*</span></label>
+            <select id="board" name="board" required aria-required="true">
+              <option value="" disabled selected>Select board</option>
+              <option>CBSE</option>
+              <option>ICSE</option>
+              <option>State Board</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="branchName">Branch Name</label>
+            <input type="text" id="branchName" name="branchName" placeholder="If part of a school group">
+          </div>
+          <div class="field">
+            <label for="schoolPhone">School Contact Number <span class="req">*</span></label>
+            <input type="tel" id="schoolPhone" name="schoolPhone" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="schoolEmail">School Email Id <span class="req">*</span></label>
+            <input type="email" id="schoolEmail" name="schoolEmail" required aria-required="true">
+          </div>
+
+          <div class="field-wide form-subhead">Principal Details</div>
+          <div class="field">
+            <label for="principalName">Principal Name <span class="req">*</span></label>
+            <input type="text" id="principalName" name="principalName" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="principalPhone">Mobile Number <span class="req">*</span></label>
+            <input type="tel" id="principalPhone" name="principalPhone" required aria-required="true">
+          </div>
+          <div class="field field-wide">
+            <label for="principalEmail">Principal Email Id</label>
+            <input type="email" id="principalEmail" name="principalEmail">
+          </div>
+
+          <div class="field-wide form-subhead">Coordinator Details</div>
+          <div class="field">
+            <label for="coordinatorName">Coordinator Name <span class="req">*</span></label>
+            <input type="text" id="coordinatorName" name="coordinatorName" required aria-required="true">
+          </div>
+          <div class="field">
+            <label for="coordinatorPhone">Mobile Number <span class="req">*</span></label>
+            <input type="tel" id="coordinatorPhone" name="coordinatorPhone" required aria-required="true">
+          </div>
+          <div class="field field-wide">
+            <label for="coordinatorEmail">Coordinator Email Id</label>
+            <input type="email" id="coordinatorEmail" name="coordinatorEmail">
+          </div>
+
+          <div class="field-wide form-subhead">Student Strength <span class="form-subhead-note">(based on the numbers provided, we will issue question papers &amp; OMR sheets)</span></div>
+          <div class="field-wide strength-grid">
+            <div class="field">
+              <label for="studentsClass1to9">Class 1st&ndash;9th</label>
+              <input type="number" id="studentsClass1to9" name="studentsClass1to9" min="0">
+            </div>
+            <div class="field">
+              <label for="studentsClass10">Class 10th</label>
+              <input type="number" id="studentsClass10" name="studentsClass10" min="0">
+            </div>
+            <div class="field">
+              <label for="studentsClass11">Class 11th</label>
+              <input type="number" id="studentsClass11" name="studentsClass11" min="0">
+            </div>
+            <div class="field">
+              <label for="studentsClass12">Class 12th</label>
+              <input type="number" id="studentsClass12" name="studentsClass12" min="0">
+            </div>
+          </div>
+
+          <div class="field-wide form-subhead">News First &amp; Vendor Coordination</div>
+          <div class="field">
+            <label for="newsFirstPocName">News First POC Name</label>
+            <input type="text" id="newsFirstPocName" name="newsFirstPocName">
+          </div>
+          <div class="field">
+            <label for="newsFirstPocPhone">Mobile Number</label>
+            <input type="tel" id="newsFirstPocPhone" name="newsFirstPocPhone">
+          </div>
+          <div class="field">
+            <label for="vendorName">Vendor Name</label>
+            <input type="text" id="vendorName" name="vendorName">
+          </div>
+          <div class="field">
+            <label for="vendorPhone">Mobile Number</label>
+            <input type="tel" id="vendorPhone" name="vendorPhone">
+          </div>
+
+          <div class="field">
+            <label for="testDate">Test Date</label>
+            <input type="date" id="testDate" name="testDate">
+            <p class="field-hint">Please fill the test date as provided to the Nava Dishe coordinator.</p>
+          </div>
+
+          <div class="field field-wide">
+            <label for="message">Message / Notes</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+          </div>
+
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp-field" aria-hidden="true">
+
+          <div class="field field-wide">
+            <button type="submit" class="btn btn-primary">Save Registration</button>
+          </div>
+        </form>
+
+        <div id="formStatus" class="form-status" hidden aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ===== TABLE TAB ===== -->
+    <section id="tableTab" class="dash-panel" hidden>
+      <div class="table-toolbar">
+        <input type="search" id="searchInput" class="table-search" placeholder="Search name, phone, district, school…">
+        <select id="filterSource" class="table-filter">
+          <option value="">All Sources</option>
+          <option value="Website">Website</option>
+          <option value="Dashboard">Dashboard</option>
+        </select>
+        <select id="filterCallback" class="table-filter">
+          <option value="">Callback: All</option>
+          <option value="Yes">Callback: Requested</option>
+          <option value="No">Callback: Not requested</option>
+        </select>
+        <select id="filterBoard" class="table-filter">
+          <option value="">All Boards</option>
+        </select>
+        <button type="button" id="refreshBtn" class="btn btn-ghost table-refresh">Refresh</button>
+        <span id="rowCount" class="table-count"></span>
+      </div>
+
+      <div id="tableStatus" class="form-status" hidden></div>
+
+      <div class="table-wrap">
+        <table class="dash-table" id="leadsTable">
+          <thead>
+            <tr>
+              <th data-sort="Timestamp">Date</th>
+              <th data-sort="Source">Source</th>
+              <th data-sort="_contact">Contact</th>
+              <th data-sort="_phone">Phone</th>
+              <th data-sort="District">District</th>
+              <th data-sort="School Name">School</th>
+              <th data-sort="School Board">Board</th>
+              <th data-sort="Request Callback">Callback</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== ROW DETAILS OVERLAY ===== -->
+<div id="detailOverlay" class="detail-overlay" hidden>
+  <div class="detail-card">
+    <button type="button" id="detailClose" class="detail-close" aria-label="Close">&times;</button>
+    <h3>Registration Details</h3>
+    <dl id="detailList" class="detail-list"></dl>
+  </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>

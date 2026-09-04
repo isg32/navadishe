@@ -1,0 +1,293 @@
+/* ===== Dashboard shell ===== */
+.dashboard-body{
+  background:var(--paper-deep);
+  min-height:100vh;
+}
+
+/* ===== Login ===== */
+.login-view{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.login-card{
+  width:100%;
+  max-width:380px;
+  background:var(--paper);
+  border:1px solid var(--ink);
+  border-radius:8px;
+  padding:40px 32px;
+}
+.login-brand{
+  font-size:24px;
+  margin-bottom:4px;
+}
+.login-sub{
+  font-family:'Inter',sans-serif;
+  font-size:14.5px;
+  color:var(--ink-soft);
+  margin-bottom:24px;
+}
+.login-card .field{margin-bottom:20px;}
+.login-card .field label{
+  display:block;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink);
+  margin-bottom:8px;
+}
+.login-card .field input{
+  width:100%;
+  min-height:48px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:2px;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  font-size:15px;
+}
+.login-card .field input:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(31,79,216,0.15);
+}
+.login-btn{
+  width:100%;
+  border:none;
+  cursor:pointer;
+  margin-top:4px;
+}
+
+/* ===== Dashboard header / tabs ===== */
+.dash-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 32px;
+  background:var(--paper);
+  border-bottom:1px solid var(--ink);
+}
+.dash-header-right{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.dash-user{
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  color:var(--ink-soft);
+}
+.dash-logout{
+  padding:10px 18px;
+  font-size:13px;
+}
+.dash-tabs{
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.dash-tabs-wrap{
+  display:flex;
+  gap:4px;
+  padding:0 32px;
+}
+.dash-tab{
+  border:none;
+  background:none;
+  cursor:pointer;
+  padding:16px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:14.5px;
+  font-weight:600;
+  color:var(--ink-soft);
+  border-bottom:3px solid transparent;
+}
+.dash-tab.is-active{
+  color:var(--primary-deep);
+  border-bottom-color:var(--primary);
+}
+.dash-main{
+  max-width:1200px;
+  padding:40px 32px 80px;
+}
+.dash-panel[hidden]{display:none;}
+
+/* ===== Table toolbar ===== */
+.table-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  margin-bottom:20px;
+}
+.table-search{
+  flex:1 1 240px;
+  min-height:44px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:2px;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  font-size:14.5px;
+}
+.table-search:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(31,79,216,0.15);
+}
+.table-filter{
+  min-height:44px;
+  padding:0 12px;
+  border:1px solid var(--line);
+  border-radius:2px;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+}
+.table-refresh{
+  padding:10px 18px;
+  font-size:13px;
+  white-space:nowrap;
+}
+.table-count{
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  margin-left:auto;
+}
+
+/* ===== Table ===== */
+.table-wrap{
+  background:var(--paper);
+  border:1px solid var(--ink);
+  border-radius:8px;
+  overflow-x:auto;
+}
+.dash-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:820px;
+}
+.dash-table thead th{
+  text-align:left;
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  color:var(--ink-soft);
+  padding:14px 16px;
+  border-bottom:2px solid var(--ink);
+  cursor:pointer;
+  user-select:none;
+  white-space:nowrap;
+}
+.dash-table thead th:hover{color:var(--primary-deep);}
+.dash-table thead th.is-sorted::after{
+  content:" \25BE";
+}
+.dash-table thead th.is-sorted-desc::after{
+  content:" \25B4";
+}
+.dash-table tbody td{
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  color:var(--ink);
+  white-space:nowrap;
+}
+.dash-table tbody tr{cursor:pointer;}
+.dash-table tbody tr:hover td{background:var(--paper-deep);}
+.dash-table tbody tr:last-child td{border-bottom:none;}
+.table-empty-row td{
+  text-align:center;
+  color:var(--ink-soft);
+  padding:40px 16px;
+  cursor:default;
+}
+.table-empty-row:hover td{background:none;}
+.badge{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:100px;
+  font-size:12px;
+  font-weight:600;
+}
+.badge-website{background:#E9EEFC;color:var(--primary-deep);}
+.badge-dashboard{background:#FDECDD;color:var(--marigold-deep);}
+.badge-yes{background:#E7F5EE;color:#1E6B45;}
+.badge-no{background:var(--paper-deep);color:var(--ink-soft);}
+
+/* ===== Row details overlay ===== */
+.detail-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(11,28,48,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  z-index:100;
+}
+.detail-card{
+  position:relative;
+  width:100%;
+  max-width:560px;
+  max-height:85vh;
+  overflow-y:auto;
+  background:var(--paper);
+  border:1px solid var(--ink);
+  border-radius:8px;
+  padding:32px;
+}
+.detail-close{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:32px;
+  height:32px;
+  border:none;
+  background:none;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  color:var(--ink-soft);
+}
+.detail-card h3{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:20px;
+  margin-bottom:20px;
+}
+.detail-list{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:10px 16px;
+}
+.detail-list dt{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--ink-soft);
+  white-space:nowrap;
+}
+.detail-list dd{
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  color:var(--ink);
+  word-break:break-word;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 700px){
+  .dash-header{padding:16px 20px;}
+  .dash-tabs-wrap{padding:0 20px;overflow-x:auto;}
+  .dash-main{padding:28px 20px 60px;}
+  .dash-user{display:none;}
+}
