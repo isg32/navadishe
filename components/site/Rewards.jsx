@@ -18,7 +18,7 @@ export default function Rewards() {
         </div>
 
         <div className="rewards-banner reveal">
-          <img src="/images/rewards.jpg" alt="Students who cleared the exam, standing proudly" width="1200" height="250" />
+          <img src="/images/rewards.jpg" alt="A classroom of school students in uniform" width="1200" height="250" />
         </div>
 
         <div className="rewards-grid reveal">

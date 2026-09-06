@@ -19,7 +19,7 @@ export default function Reach() {
             ))}
           </div>
           <div className="reach-photo">
-            <img src="/images/reach.jpg" alt="Students studying together in front of a Karnataka landmark" width="900" height="420" />
+            <img src="/images/reach.jpg" alt="Map of Karnataka with Nava Dishe exam districts marked" width="900" height="520" />
           </div>
         </div>
       </div>

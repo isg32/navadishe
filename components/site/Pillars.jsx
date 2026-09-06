@@ -1,7 +1,7 @@
 const PILLARS = [
   {
     src: '/images/pillar-english.jpg',
-    alt: 'Student practicing English comprehension',
+    alt: 'School student in uniform smiling with an open book',
     idx: '01 / English',
     title: 'English',
     copy: 'Comprehension, grammar and vocabulary fundamentals.',

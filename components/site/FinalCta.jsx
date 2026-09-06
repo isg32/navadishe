@@ -17,7 +17,7 @@ export default function FinalCta() {
             </div>
           </div>
           <div className="final-photo">
-            <img src="/images/final-cta.jpg" alt="Sunrise over Karnataka with a graduation cap" width="700" height="400" />
+            <img src="/images/final-cta.jpg" alt="School students in uniform walking together down a tree-lined road" width="700" height="400" />
           </div>
         </div>
       </div>

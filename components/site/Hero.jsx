@@ -18,7 +18,7 @@ export default function Hero() {
           </div>
           <div className="hero-visual reveal">
             <div className="hero-photo-frame">
-              <img src="/images/hero.jpg" alt="Student holding an OMR answer sheet, with Karnataka landmarks in the background" width="800" height="900" />
+              <img src="/images/hero.jpg" alt="Two Karnataka school students in uniform cheering, one holding textbooks" width="800" height="900" />
               <div className="hero-stamp">Free<br />to<br />Enter</div>
             </div>
           </div>

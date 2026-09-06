@@ -11,7 +11,7 @@ export default function Eligibility() {
         </div>
 
         <div className="elig-banner reveal">
-          <img src="/images/eligibility.jpg" alt="Three Karnataka students carrying books, ready for the exam" width="1200" height="230" />
+          <img src="/images/eligibility.jpg" alt="A large group of school students in uniform gathered for the exam" width="1200" height="230" />
         </div>
 
         <div className="elig-grid reveal">

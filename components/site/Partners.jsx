@@ -19,7 +19,7 @@ export default function Partners() {
 
         <div className="partners-wrap reveal">
           <div className="partner-photo">
-            <img src="/images/partners.jpg" alt="Students representing different career paths — civil services, defence, and higher education" width="700" height="520" />
+            <img src="/images/partners.jpg" alt="School students walking to class with backpacks" width="700" height="520" />
           </div>
           <div className="partner-cats">
             {CATEGORIES.map((cat) => (
