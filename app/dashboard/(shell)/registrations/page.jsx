@@ -16,6 +16,7 @@ const COLUMNS = [
   { sort: 'Timestamp', label: 'Date' },
   { sort: '_contact', label: 'Contact' },
   { sort: '_phone', label: 'Phone' },
+  { sort: 'City', label: 'City' },
   { sort: 'District', label: 'District' },
   { sort: 'School Name', label: 'School' },
   { sort: 'School Board', label: 'Board' },
@@ -26,6 +27,7 @@ export default function RegistrationsPage() {
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [errorMsg, setErrorMsg] = useState('');
   const [boardFilter, setBoardFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
   const [selected, setSelected] = useState(null);
 
   function load() {
@@ -45,18 +47,31 @@ export default function RegistrationsPage() {
 
   useEffect(load, []);
 
+  const scopedRows = useMemo(
+    () => rows.filter(
+      (r) => (!boardFilter || r['School Board'] === boardFilter)
+        && (!cityFilter || r['City'] === cityFilter)
+    ),
+    [rows, boardFilter, cityFilter]
+  );
+
   const { search, setSearch, sortKey, sortDir, toggleSort, visibleRows } = useTableState({
-    rows: boardFilter ? rows.filter((r) => r['School Board'] === boardFilter) : rows,
+    rows: scopedRows,
     defaultSortKey: 'Timestamp',
     computed: { _contact: computeContact, _phone: computePhone },
     searchGetters: (row) => [
-      computeContact(row), computePhone(row), row['District'], row['School Name'],
+      computeContact(row), computePhone(row), row['City'], row['District'], row['School Name'],
       row['School Email Id'], row['Principal Name'], row['Coordinator Name'], row['Message'],
     ],
   });
 
   const boards = useMemo(
     () => Array.from(new Set(rows.map((r) => r['School Board']).filter(Boolean))).sort(),
+    [rows]
+  );
+
+  const cities = useMemo(
+    () => Array.from(new Set(rows.map((r) => r['City']).filter(Boolean))).sort(),
     [rows]
   );
 
@@ -67,6 +82,10 @@ export default function RegistrationsPage() {
           type="search" className="table-search" placeholder="Search contact, phone, district, school…"
           value={search} onChange={(e) => setSearch(e.target.value)}
         />
+        <select className="table-filter" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}>
+          <option value="">All Cities</option>
+          {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
         <select className="table-filter" value={boardFilter} onChange={(e) => setBoardFilter(e.target.value)}>
           <option value="">All Boards</option>
           {boards.map((b) => <option key={b} value={b}>{b}</option>)}
@@ -96,13 +115,14 @@ export default function RegistrationsPage() {
           </thead>
           <tbody>
             {status === 'ready' && visibleRows.length === 0 && (
-              <tr className="table-empty-row"><td colSpan={6}>No registrations match your filters.</td></tr>
+              <tr className="table-empty-row"><td colSpan={7}>No registrations match your filters.</td></tr>
             )}
             {visibleRows.map((row, i) => (
               <tr key={i} onClick={() => setSelected(row)}>
                 <td>{formatDate(row['Timestamp'])}</td>
                 <td>{computeContact(row)}</td>
                 <td>{computePhone(row)}</td>
+                <td>{row['City'] || '—'}</td>
                 <td>{row['District'] || '—'}</td>
                 <td>{row['School Name'] || '—'}</td>
                 <td>{row['School Board'] || '—'}</td>
