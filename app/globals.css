@@ -507,6 +507,16 @@ section{padding:100px 0;}
   font-size:15px;
 }
 .field textarea{padding:12px 14px;min-height:110px;}
+.field input.field-locked{
+  background:var(--paper-deep);
+  color:var(--ink-soft);
+  cursor:not-allowed;
+}
+.field select:disabled{
+  background:var(--paper-deep);
+  color:var(--ink-soft);
+  cursor:not-allowed;
+}
 .field-hint{
   margin-top:8px;
   font-family:var(--font-inter), sans-serif;

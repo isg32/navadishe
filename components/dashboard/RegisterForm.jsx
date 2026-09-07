@@ -1,12 +1,20 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import {
+  KARNATAKA_STATE,
+  KARNATAKA_DISTRICTS,
+  KARNATAKA_CITIES_BY_DISTRICT,
+} from '@/lib/karnataka';
 
 export default function DashboardRegisterForm() {
   const formRef = useRef(null);
   const statusRef = useRef(null);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
+  const [district, setDistrict] = useState('');
+
+  const cityOptions = KARNATAKA_CITIES_BY_DISTRICT[district] || [];
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -23,7 +31,8 @@ export default function DashboardRegisterForm() {
         throw new Error(data.error || 'Request failed');
       }
 
-      form.reset(); // restores state's defaultValue ("Karnataka") along with everything else
+      form.reset(); // restores defaultValues; State stays "Karnataka" (locked)
+      setDistrict(''); // clear the controlled district -> resets the City dropdown too
       setStatus({ kind: 'success', message: 'Registration saved. You can enter the next one below.' });
       requestAnimationFrame(() => {
         statusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -51,16 +60,51 @@ export default function DashboardRegisterForm() {
           <input type="text" id="schoolAddress" name="schoolAddress" required />
         </div>
         <div className="field">
-          <label htmlFor="city">City <span className="req">*</span></label>
-          <input type="text" id="city" name="city" required />
+          <label htmlFor="district">District <span className="req">*</span></label>
+          <select
+            id="district"
+            name="district"
+            required
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+          >
+            <option value="" disabled>Select district</option>
+            {KARNATAKA_DISTRICTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
         </div>
         <div className="field">
-          <label htmlFor="district">District <span className="req">*</span></label>
-          <input type="text" id="district" name="district" required />
+          <label htmlFor="city">City <span className="req">*</span></label>
+          <select
+            key={district || 'no-district'}
+            id="city"
+            name="city"
+            required
+            defaultValue=""
+            disabled={!district}
+          >
+            <option value="" disabled>
+              {district ? 'Select city' : 'Select a district first'}
+            </option>
+            {cityOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
         <div className="field">
           <label htmlFor="state">State <span className="req">*</span></label>
-          <input type="text" id="state" name="state" defaultValue="Karnataka" required />
+          <input
+            type="text"
+            id="state"
+            name="state"
+            value={KARNATAKA_STATE}
+            readOnly
+            aria-readonly="true"
+            tabIndex={-1}
+            className="field-locked"
+          />
+          <p className="field-hint">Nava Dishe is a Karnataka-only programme.</p>
         </div>
         <div className="field">
           <label htmlFor="pincode">Pin-code <span className="req">*</span></label>
