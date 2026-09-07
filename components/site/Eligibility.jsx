@@ -7,7 +7,7 @@ export default function Eligibility() {
             <div className="eyebrow">Who Can Participate</div>
             <h2>Open Doors,<br />Zero Fees</h2>
           </div>
-          <p>Open to all high-school and higher-secondary students, regardless of board.</p>
+          <p>Open to Classes 10, 11 &amp; 12 students across Karnataka — CBSE, ICSE and Karnataka State Board.</p>
         </div>
 
         <div className="elig-banner reveal">
@@ -28,7 +28,7 @@ export default function Eligibility() {
         </div>
 
         <div className="boards-row reveal">
-          <span>CBSE</span><span className="sep">/</span><span>ICSE</span><span className="sep">/</span><span>State Boards</span>
+          <span>CBSE</span><span className="sep">/</span><span>ICSE</span><span className="sep">/</span><span>Karnataka State Board</span>
         </div>
       </div>
     </section>

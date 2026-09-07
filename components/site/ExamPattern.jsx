@@ -14,19 +14,19 @@ export default function ExamPattern() {
           <div className="reveal">
             <div className="stat-grid">
               <div className="stat-cell">
-                <div className="num">40</div>
+                <div className="num">60</div>
                 <div className="lbl">Minutes</div>
               </div>
               <div className="stat-cell">
-                <div className="num">40</div>
-                <div className="lbl">MCQs</div>
+                <div className="num">60</div>
+                <div className="lbl">Questions</div>
               </div>
               <div className="stat-cell">
-                <div className="num">80</div>
+                <div className="num">240</div>
                 <div className="lbl">Total Marks</div>
               </div>
               <div className="stat-cell accent">
-                <div className="num">0</div>
+                <div className="num">No</div>
                 <div className="lbl">Negative Marking</div>
               </div>
             </div>

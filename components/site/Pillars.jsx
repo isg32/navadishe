@@ -20,6 +20,13 @@ const PILLARS = [
     title: 'General Awareness & Aptitude',
     copy: 'Current affairs, civics, and quantitative aptitude.',
   },
+  {
+    src: '/images/pillar-math.jpg',
+    alt: 'Student working through a mathematics problem',
+    idx: '04 / Mathematics',
+    title: 'Mathematics Assessment',
+    copy: 'Mathematics assessment for Class 10 students.',
+  },
 ];
 
 export default function Pillars() {
@@ -29,7 +36,7 @@ export default function Pillars() {
         <div className="section-head reveal">
           <div>
             <div className="eyebrow">What Every Student Is Evaluated On</div>
-            <h2>Three Pillars<br />of the Test</h2>
+            <h2>Exam Format,<br />in Four Parts</h2>
           </div>
           <p>A statewide benchmark of competitive readiness.</p>
         </div>

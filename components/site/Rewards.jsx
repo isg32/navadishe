@@ -1,8 +1,9 @@
 const REWARDS = [
-  { rank: 'State 1st', icon: '🛵', title: 'E-Bike / Electric Scooter' },
-  { rank: 'State 2nd', icon: '💻', title: 'Laptop' },
-  { rank: 'State 3rd', icon: '📱', title: 'Tablet / Smartphone' },
-  { rank: 'Also Awarded', icon: '⌚', title: 'Smartwatch + Career Counselling' },
+  { rank: 'State 1', icon: '🛵', title: 'E-Bike / Electric Scooter', value: 'Up to ₹1 Lakh' },
+  { rank: 'State 2', icon: '💻', title: 'Laptop', value: 'Up to ₹50,000' },
+  { rank: 'State 3', icon: '📱', title: 'Tablet / Smartphone', value: 'Up to ₹25,000' },
+  { rank: 'State 4', icon: '⌚', title: 'Smartwatch + Wireless Earbuds', value: 'Up to ₹11,000' },
+  { rank: 'State 5', icon: '🎧', title: 'Premium Wireless Headphones', value: 'Up to ₹5,000' },
 ];
 
 export default function Rewards() {
@@ -27,6 +28,7 @@ export default function Rewards() {
               <div className="reward-rank">{r.rank}</div>
               <div className="reward-icon">{r.icon}</div>
               <h4>{r.title}</h4>
+              <div className="reward-value">{r.value}</div>
             </div>
           ))}
         </div>

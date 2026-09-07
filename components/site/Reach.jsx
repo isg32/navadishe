@@ -1,4 +1,4 @@
-const CITIES = ['Belagavi', 'Hubballi-Dharwad', 'Kalaburagi', 'Shivamogga', 'Udupi', 'Mangaluru', 'Mysuru', 'Bengaluru'];
+const CITIES = ['Bengaluru', 'Mysuru', 'Mangaluru', 'Belagavi', 'Hubballi-Dharwad', 'Kalaburagi', 'Shivamogga', 'Udupi', 'Tumakuru', 'Davanagere'];
 
 export default function Reach() {
   return (
@@ -9,7 +9,7 @@ export default function Reach() {
             <div className="eyebrow">News First&rsquo;s Home State</div>
             <h2>Across<br />Karnataka</h2>
           </div>
-          <p>A focused regional reach — touching hundreds of thousands of students.</p>
+          <p>Reaching students across the state — 10 key cities, all 31 districts.</p>
         </div>
 
         <div className="reach-grid reveal">

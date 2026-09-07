@@ -12,7 +12,7 @@ export default function About() {
 
         <div className="about-grid">
           <div className="about-copy reveal">
-            <p>Nava Dishe is an annual, free-of-cost talent recognition exam open to high-school students across Karnataka. It&rsquo;s built as a benchmarking platform — one that measures critical thinking, aptitude and general awareness, while removing the financial barriers that usually stand between a student and a fair shot.</p>
+            <p>Nava Dishe is an annual, free-of-cost talent recognition examination for high-school students across all 31 districts of Karnataka. It&rsquo;s built as a competitive benchmarking platform — one that measures critical thinking, aptitude and general awareness, while removing the financial barriers that usually stand between a student and a fair shot.</p>
             <p>No coaching-class fees. No entry cost. Just a single, well-designed paper that lets ability speak for itself.</p>
             <div className="chip-row">
               <div className="chip"><span className="dot" />Free to Enter</div>

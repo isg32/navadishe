@@ -1,8 +1,12 @@
 const CATEGORIES = [
-  { label: 'Civil Services', names: ['Drishti IAS'] },
-  { label: 'Defence', names: ['Centurion Defence Academy', 'Dreamers'] },
-  { label: 'Coaching & Technology', names: ['PhysicsWallah', 'Saffalta', 'Scholars Den'] },
-  { label: 'University Partners', names: ['Galgotias University', 'Chandigarh University', 'GLA University', 'Graphic Era University'] },
+  {
+    label: 'Choice 1 · 16 Partner Universities & Colleges',
+    names: ['Galgotias', 'PSIT', 'GLA', 'Chandigarh', 'Graphic Era', 'GNIOT', 'Mangalayatan', 'Invertis', 'Chitkara', 'Dronacharya', 'Doon Defence Dreamers', '& more'],
+  },
+  {
+    label: 'Choice 2 · Courses & Fields',
+    names: ['Engineering', 'Management', 'Pharmacy', 'Law', 'Architecture & Planning', 'Agriculture', 'Graduation (Science / Commerce / Humanities & Arts)', 'Defence', 'Civil Services'],
+  },
 ];
 
 export default function Partners() {
@@ -11,10 +15,10 @@ export default function Partners() {
       <div className="wrap">
         <div className="section-head reveal">
           <div>
-            <div className="eyebrow">Building the Bridge from Exam to Career</div>
-            <h2>An Ecosystem<br />of Partners</h2>
+            <div className="eyebrow">One OMR Sheet · Two Student Choices</div>
+            <h2>The Student<br />Picks the Target</h2>
           </div>
-          <p>Where a single test opens many doors.</p>
+          <p>Beyond 60 answers, the sheet captures two choices that drive the outcome — the universities a student wants scholarships from, and the fields that fit their future.</p>
         </div>
 
         <div className="partners-wrap reveal">

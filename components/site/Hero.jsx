@@ -9,6 +9,7 @@ export default function Hero() {
               <span className="l1">Nava</span><br />
               <span className="l2">Dishe</span>
             </h1>
+            <div className="hero-tagline" lang="kn">ನವ ದಿಶೆ <span aria-hidden="true">·</span> <span lang="en">Future Forward</span></div>
             <div className="hero-sub">Annual Mega-Scholarship &amp; Talent Recognition Exam</div>
             <p className="hero-quote"><span>&ldquo;</span>A statewide search for Karnataka&rsquo;s brightest minds.<span>&rdquo;</span></p>
             <div className="hero-ctas">
