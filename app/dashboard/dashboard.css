@@ -617,6 +617,109 @@
 .detail-edit-field input:focus,
 .detail-edit-field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,107,116,0.15);}
 
+/* ===== New Registration form (self-contained — no longer inherits the
+   public site's globals.css form styles) ===== */
+.dashboard-body .register-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.dashboard-body .register-form .field-wide{grid-column:1 / -1;}
+.dashboard-body .register-form .field{margin:0;}
+.dashboard-body .register-form .field label{
+  display:block;
+  font-family:var(--font-inter), sans-serif;
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--ink);
+  margin-bottom:6px;
+}
+.dashboard-body .register-form .req{color:var(--marigold-deep);}
+.dashboard-body .register-form .field input[type="text"],
+.dashboard-body .register-form .field input[type="tel"],
+.dashboard-body .register-form .field input[type="email"],
+.dashboard-body .register-form .field input[type="number"],
+.dashboard-body .register-form .field input[type="date"],
+.dashboard-body .register-form .field select,
+.dashboard-body .register-form .field textarea{
+  width:100%;
+  min-height:44px;
+  padding:0 12px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-inter), sans-serif;
+  font-size:14px;
+  line-height:1.4;
+}
+.dashboard-body .register-form .field select{
+  padding:0 34px 0 12px;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234B5A6E' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  cursor:pointer;
+}
+.dashboard-body .register-form .field textarea{padding:10px 12px;min-height:96px;resize:vertical;}
+.dashboard-body .register-form .field input:focus,
+.dashboard-body .register-form .field select:focus,
+.dashboard-body .register-form .field textarea:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(37,107,116,0.15);
+}
+.dashboard-body .register-form .field input.field-locked,
+.dashboard-body .register-form .field select:disabled{
+  background:var(--paper-deep);
+  color:var(--ink-soft);
+  cursor:not-allowed;
+}
+.dashboard-body .register-form .field-hint{
+  margin-top:6px;
+  font-family:var(--font-inter), sans-serif;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.dashboard-body .form-subhead{
+  font-family:var(--font-inter), sans-serif;
+  font-size:12.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  color:var(--ink);
+  padding-bottom:8px;
+  margin-top:10px;
+  border-bottom:2px solid var(--ink);
+}
+.dashboard-body .form-subhead-note{
+  font-weight:400;
+  text-transform:none;
+  letter-spacing:normal;
+  color:var(--ink-soft);
+}
+.dashboard-body .strength-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+}
+.dashboard-body .consent-field{display:flex;align-items:flex-start;gap:10px;}
+.dashboard-body .consent-field input{width:18px;height:18px;margin-top:2px;accent-color:var(--primary);flex:none;}
+.dashboard-body .consent-field label{margin-bottom:0;font-weight:400;font-size:13.5px;color:var(--ink-soft);}
+.dashboard-body .hp-field{position:absolute;left:-9999px;}
+.dashboard-body .form-status{
+  margin-top:20px;
+  padding:14px 18px;
+  border-radius:8px;
+  font-family:var(--font-inter), sans-serif;
+  font-size:14px;
+  font-weight:600;
+}
+.dashboard-body .form-status.success{background:#E7F5EE;color:#1E6B45;border:1px solid #1E6B45;}
+.dashboard-body .form-status.error{background:#FDEAEA;color:#B3261E;border:1px solid #B3261E;}
+
 /* ===== Responsive ===== */
 @media (max-width: 980px){
   .dash-sidebar{transform:translateX(-100%);}
@@ -634,4 +737,6 @@
   .stat-grid-cards{grid-template-columns:1fr 1fr;}
   .user-form{grid-template-columns:1fr;}
   .detail-edit-grid{grid-template-columns:1fr;}
+  .dashboard-body .register-form{grid-template-columns:1fr;}
+  .dashboard-body .strength-grid{grid-template-columns:repeat(2,1fr);}
 }

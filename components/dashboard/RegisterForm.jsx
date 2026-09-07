@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { KARNATAKA_STATE, KARNATAKA_CITIES_BY_DISTRICT } from '@/lib/karnataka';
+import { KARNATAKA_STATE, KARNATAKA_DISTRICTS, KARNATAKA_CITIES_BY_DISTRICT } from '@/lib/karnataka';
 
 // Flat, de-duplicated, sorted list of every city/town in the reference data —
 // offered as suggestions, but the field is free-typed so unusual spellings
@@ -73,8 +73,12 @@ export default function DashboardRegisterForm() {
         </div>
         <div className="field">
           <label htmlFor="district">District <span className="req">*</span></label>
-          <input type="text" id="district" name="district" autoComplete="off" required />
-          <p className="field-hint">Type the district name — spellings can vary.</p>
+          <select id="district" name="district" defaultValue="" required>
+            <option value="" disabled>Select district</option>
+            {KARNATAKA_DISTRICTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
         </div>
         <div className="field">
           <label htmlFor="state">State <span className="req">*</span></label>
