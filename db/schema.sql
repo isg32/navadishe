@@ -59,6 +59,11 @@ create table if not exists school_registrations (
   test_date date,
   message text
 );
+-- Human-readable entry code, generated on insert as <STATE>-<CITY>-<id>
+-- (e.g. KA-BLR-0042). Added via ALTER so existing databases pick it up.
+alter table school_registrations add column if not exists code text;
+
 create index if not exists idx_school_registrations_district on school_registrations (district);
 create index if not exists idx_school_registrations_board on school_registrations (board);
 create index if not exists idx_school_registrations_created_at on school_registrations (created_at desc);
+create unique index if not exists idx_school_registrations_code on school_registrations (code);

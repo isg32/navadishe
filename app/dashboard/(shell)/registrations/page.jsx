@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useTableState } from '@/hooks/useTableState';
 import { formatDate } from '@/lib/format';
+import { useSession } from '@/components/dashboard/SessionContext';
 import DetailOverlay from '@/components/dashboard/DetailOverlay';
 
 function computeContact(row) {
@@ -12,23 +14,30 @@ function computePhone(row) {
   return row['Principal Mobile Number'] || row['School Contact Number'] || row['Coordinator Mobile Number'] || '—';
 }
 
-const COLUMNS = [
-  { sort: 'Timestamp', label: 'Date' },
-  { sort: '_contact', label: 'Contact' },
-  { sort: '_phone', label: 'Phone' },
-  { sort: 'City', label: 'City' },
-  { sort: 'District', label: 'District' },
-  { sort: 'School Name', label: 'School' },
-  { sort: 'School Board', label: 'Board' },
-];
-
 export default function RegistrationsPage() {
+  const { user } = useSession();
+  const isAdmin = user?.role === 'admin';
+
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [errorMsg, setErrorMsg] = useState('');
   const [boardFilter, setBoardFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [selected, setSelected] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+
+  const COLUMNS = useMemo(() => [
+    { sort: 'Timestamp', label: 'Date' },
+    { sort: 'Code', label: 'Code' },
+    { sort: '_contact', label: 'Contact' },
+    { sort: '_phone', label: 'Phone' },
+    { sort: 'City', label: 'City' },
+    { sort: 'District', label: 'District' },
+    { sort: 'School Name', label: 'School' },
+    { sort: 'School Board', label: 'Board' },
+    { sort: 'Created By', label: 'Added By' },
+    ...(isAdmin ? [{ sort: null, label: '' }] : []),
+  ], [isAdmin]);
 
   function load() {
     setStatus('loading');
@@ -60,8 +69,8 @@ export default function RegistrationsPage() {
     defaultSortKey: 'Timestamp',
     computed: { _contact: computeContact, _phone: computePhone },
     searchGetters: (row) => [
-      computeContact(row), computePhone(row), row['City'], row['District'], row['School Name'],
-      row['School Email Id'], row['Principal Name'], row['Coordinator Name'], row['Message'],
+      row['Code'], computeContact(row), computePhone(row), row['City'], row['District'], row['School Name'],
+      row['School Email Id'], row['Principal Name'], row['Coordinator Name'], row['Created By'], row['Message'],
     ],
   });
 
@@ -69,17 +78,35 @@ export default function RegistrationsPage() {
     () => Array.from(new Set(rows.map((r) => r['School Board']).filter(Boolean))).sort(),
     [rows]
   );
-
   const cities = useMemo(
     () => Array.from(new Set(rows.map((r) => r['City']).filter(Boolean))).sort(),
     [rows]
   );
 
+  async function handleDelete(row, e) {
+    e.stopPropagation();
+    const label = row['Code'] || row['School Name'] || `entry #${row['Id']}`;
+    if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+    setBusyId(row['Id']);
+    try {
+      const res = await fetch(`/api/leads?sheet=dashboard&id=${row['Id']}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.result !== 'success') throw new Error(data.error || 'Delete failed');
+      setRows((rs) => rs.filter((r) => r['Id'] !== row['Id']));
+    } catch (err) {
+      window.alert(err.message || 'Could not delete this entry.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const colCount = COLUMNS.length;
+
   return (
     <>
       <div className="table-toolbar">
         <input
-          type="search" className="table-search" placeholder="Search contact, phone, district, school…"
+          type="search" className="table-search" placeholder="Search code, contact, phone, district, school…"
           value={search} onChange={(e) => setSearch(e.target.value)}
         />
         <select className="table-filter" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}>
@@ -102,11 +129,14 @@ export default function RegistrationsPage() {
         <table className="dash-table">
           <thead>
             <tr>
-              {COLUMNS.map((c) => (
+              {COLUMNS.map((c, i) => (
                 <th
-                  key={c.sort}
-                  className={sortKey === c.sort ? (sortDir === 'asc' ? 'is-sorted' : 'is-sorted-desc') : undefined}
-                  onClick={() => toggleSort(c.sort)}
+                  key={c.sort || `col-${i}`}
+                  className={[
+                    c.sort && sortKey === c.sort ? (sortDir === 'asc' ? 'is-sorted' : 'is-sorted-desc') : '',
+                    c.sort ? '' : 'col-actions',
+                  ].filter(Boolean).join(' ') || undefined}
+                  onClick={c.sort ? () => toggleSort(c.sort) : undefined}
                 >
                   {c.label}
                 </th>
@@ -115,24 +145,48 @@ export default function RegistrationsPage() {
           </thead>
           <tbody>
             {status === 'ready' && visibleRows.length === 0 && (
-              <tr className="table-empty-row"><td colSpan={7}>No registrations match your filters.</td></tr>
+              <tr className="table-empty-row"><td colSpan={colCount}>No registrations match your filters.</td></tr>
             )}
-            {visibleRows.map((row, i) => (
-              <tr key={i} onClick={() => setSelected(row)}>
+            {visibleRows.map((row) => (
+              <tr key={row['Id']} onClick={() => setSelected(row)}>
                 <td>{formatDate(row['Timestamp'])}</td>
+                <td>{row['Code'] || '—'}</td>
                 <td>{computeContact(row)}</td>
                 <td>{computePhone(row)}</td>
                 <td>{row['City'] || '—'}</td>
                 <td>{row['District'] || '—'}</td>
                 <td>{row['School Name'] || '—'}</td>
                 <td>{row['School Board'] || '—'}</td>
+                <td>{row['Created By'] || '—'}</td>
+                {isAdmin && (
+                  <td className="row-actions" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button" className="icon-btn" title="Edit"
+                      onClick={(e) => { e.stopPropagation(); setSelected(row); }}
+                    >
+                      <Pencil size={15} strokeWidth={1.8} />
+                    </button>
+                    <button
+                      type="button" className="icon-btn danger" title="Delete"
+                      disabled={busyId === row['Id']}
+                      onClick={(e) => handleDelete(row, e)}
+                    >
+                      <Trash2 size={15} strokeWidth={1.8} />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <DetailOverlay row={selected} onClose={() => setSelected(null)} />
+      <DetailOverlay
+        row={selected}
+        canEdit={isAdmin}
+        onSaved={load}
+        onClose={() => setSelected(null)}
+      />
     </>
   );
 }

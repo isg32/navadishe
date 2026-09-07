@@ -20,6 +20,20 @@ function toDate(v) {
   return v ? v : null; // input type="date" already gives YYYY-MM-DD
 }
 
+// Entry code parts: <STATE>-<CITY>-<zero-padded id>, e.g. KA-BLR-0042.
+function stateCode(state) {
+  const s = String(state || '').trim();
+  if (!s) return 'KA';
+  if (/^karnataka$/i.test(s)) return 'KA';
+  const letters = s.replace(/[^A-Za-z ]/g, '').trim().split(/\s+/);
+  return (letters.map((w) => w[0]).join('').slice(0, 2) || 'KA').toUpperCase();
+}
+
+function cityCode(city) {
+  const c = String(city || '').replace(/[^A-Za-z]/g, '');
+  return (c.slice(0, 3) || 'GEN').toUpperCase();
+}
+
 export async function POST(request) {
   let formData;
   try {
@@ -43,7 +57,7 @@ export async function POST(request) {
         return jsonResponse({ result: 'error', error: 'Not authorized to submit this form' }, 401);
       }
 
-      await sql`
+      const [inserted] = await sql`
         insert into school_registrations (
           created_by, school_name, school_address, city, district, state, pincode,
           board, branch_name, school_phone, school_email,
@@ -61,7 +75,13 @@ export async function POST(request) {
           ${p.newsFirstPocName || ''}, ${p.newsFirstPocPhone || ''}, ${p.vendorName || ''}, ${p.vendorPhone || ''},
           ${toDate(p.testDate)}, ${p.message || ''}
         )
+        returning id
       `;
+
+      const code = `${stateCode(p.state)}-${cityCode(p.city)}-${String(inserted.id).padStart(4, '0')}`;
+      await sql`update school_registrations set code = ${code} where id = ${inserted.id}`;
+
+      return jsonResponse({ result: 'success', code });
     } else {
       await sql`
         insert into website_leads (name, district, phone, request_callback)

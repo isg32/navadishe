@@ -1,3 +1,18 @@
+/* Dashboard design tokens — self-contained so the dashboard keeps its own
+   look regardless of the public site's theme (globals.css). */
+.dashboard-body{
+  --paper:#FFFFFF;
+  --paper-deep:#EFF4F3;
+  --ink:#11244C;
+  --ink-soft:#4B5A6E;
+  --line:rgba(17,36,76,0.14);
+  --primary:#256B74;
+  --primary-deep:#153F46;
+  --marigold:#D19323;
+  --marigold-deep:#8C6318;
+  --font-plus-jakarta: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
 /* ===== Dashboard shell ===== */
 .dashboard-body{
   background:var(--paper-deep);
@@ -541,6 +556,67 @@
   word-break:break-word;
 }
 
+/* ===== Buttons (self-contained; the public site's globals.css no longer
+   ships the dashboard's button styles) ===== */
+.dashboard-body .btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 20px;border-radius:8px;border:1px solid transparent;
+  font-family:var(--font-inter), sans-serif;font-size:13.5px;font-weight:600;
+  cursor:pointer;transition:background .18s ease, border-color .18s ease, color .18s ease;
+  text-decoration:none;line-height:1;
+}
+.dashboard-body .btn-primary{background:var(--primary);color:#fff;}
+.dashboard-body .btn-primary:hover{background:var(--primary-deep);}
+.dashboard-body .btn-primary:disabled{opacity:.6;cursor:default;}
+.dashboard-body .btn-ghost{background:var(--paper);color:var(--ink);border-color:var(--line);}
+.dashboard-body .btn-ghost:hover{border-color:var(--primary);color:var(--primary-deep);}
+.dashboard-body .btn-ghost:disabled{opacity:.6;cursor:default;}
+
+/* ===== Mini-table total row ===== */
+.mini-table .mini-table-total td{
+  border-top:2px solid var(--line);border-bottom:none;
+  font-weight:700;color:var(--ink);
+}
+
+/* ===== Registrations row actions ===== */
+.dash-table td.row-actions{white-space:nowrap;text-align:right;}
+.dash-table td.row-actions .icon-btn{padding:6px 8px;margin-left:6px;}
+.icon-btn:disabled{opacity:.5;cursor:default;}
+.icon-btn.danger{color:#B3261E;}
+/* Pin the actions column to the right edge so Edit/Delete stay reachable
+   while the wide table scrolls horizontally. */
+.dash-table thead th.col-actions,
+.dash-table td.row-actions{
+  position:sticky;right:0;
+  background:var(--paper);
+  box-shadow:-8px 0 8px -8px rgba(17,36,76,0.18);
+}
+.dash-table thead th.col-actions{z-index:2;cursor:default;}
+.dash-table tbody tr:hover td.row-actions{background:var(--paper-deep);}
+
+/* ===== Detail overlay: edit mode ===== */
+.detail-actions{
+  display:flex;justify-content:flex-end;gap:10px;
+  margin-top:24px;padding-top:20px;border-top:1px solid var(--line);
+}
+.detail-edit-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-top:18px;
+}
+.detail-edit-field{display:flex;flex-direction:column;gap:5px;}
+.detail-edit-field span{
+  font-family:var(--font-inter), sans-serif;font-size:12px;font-weight:600;color:var(--ink-soft);
+}
+.detail-edit-field input,
+.detail-edit-field textarea{
+  width:100%;min-height:40px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);
+  font-family:var(--font-inter), sans-serif;font-size:13.5px;
+}
+.detail-edit-field textarea{min-height:70px;resize:vertical;}
+.detail-edit-field:has(textarea){grid-column:1 / -1;}
+.detail-edit-field input:focus,
+.detail-edit-field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,107,116,0.15);}
+
 /* ===== Responsive ===== */
 @media (max-width: 980px){
   .dash-sidebar{transform:translateX(-100%);}
@@ -557,4 +633,5 @@
   .dash-user{display:none;}
   .stat-grid-cards{grid-template-columns:1fr 1fr;}
   .user-form{grid-template-columns:1fr;}
+  .detail-edit-grid{grid-template-columns:1fr;}
 }

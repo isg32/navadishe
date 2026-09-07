@@ -14,6 +14,11 @@ export default function Hero() {
             Karnataka — created to identify talent, celebrate merit and connect students with
             educational opportunities.
           </p>
+        </div>
+        <div className="hero-art">
+          <img src="/images/banner.png" alt="Two Karnataka school students in uniform, cheering" width="480" height="720" />
+        </div>
+        <div className="hero-actions">
           <div className="hero-ctas">
             <a href="#register" className="btn btn-primary">Register Your School</a>
             <a href="#about" className="btn btn-outline">Explore Nava Dishe</a>
@@ -23,9 +28,6 @@ export default function Hero() {
             <div className="hero-stat"><div className="num">31</div><div className="lbl">Districts Reached</div></div>
             <div className="hero-stat"><div className="num">₹0</div><div className="lbl">Registration Fee</div></div>
           </div>
-        </div>
-        <div className="hero-art">
-          <img src="/images/banner.png" alt="Two Karnataka school students in uniform, cheering" width="480" height="720" />
         </div>
       </div>
     </section>

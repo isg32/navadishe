@@ -1,6 +1,14 @@
-import { FileText, Globe, Phone, MapPin } from 'lucide-react';
+import { FileText, Globe, Phone, MapPin, School, Users, GraduationCap } from 'lucide-react';
 
-const ICONS = { registrations: FileText, leads: Globe, callback: Phone, districts: MapPin };
+const ICONS = {
+  registrations: FileText,
+  leads: Globe,
+  callback: Phone,
+  districts: MapPin,
+  schools: School,
+  strength: Users,
+  participated: GraduationCap,
+};
 
 export default function StatCard({ icon, tone, value, label }) {
   const Icon = ICONS[icon];
