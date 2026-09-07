@@ -69,8 +69,14 @@ header.scrolled{
   padding:14px 0;
   box-shadow:0 1px 0 var(--line);
 }
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-fraunces-stack);font-weight:700;font-size:20px;color:var(--navy);}
-.brand img{height:30px;width:auto;display:block;}
+.brand{display:flex;align-items:center;gap:14px;font-family:var(--font-fraunces-stack);font-weight:700;font-size:22px;color:var(--navy);}
+.brand-word{white-space:nowrap;}
+.brand-emblem{height:48px;width:auto;display:block;flex:none;}
+.brand-divider{width:1px;height:32px;background:var(--line);flex:none;}
+.brand-news{height:52px;width:auto;display:block;flex:none;}
+header.scrolled .brand-emblem{height:40px;}
+header.scrolled .brand-divider{height:26px;}
+header.scrolled .brand-news{height:44px;}
 .brand .navadishe-tag{color:var(--teal-2);}
 nav.links{display:flex;gap:34px;align-items:center;}
 nav.links a{
@@ -388,8 +394,9 @@ nav.links a:hover::after{width:100%;}
 /* ===== FOOTER ===== */
 footer{background:var(--navy-3);color:rgba(255,255,255,0.6);padding:50px 0 30px;}
 .foot-grid{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding-bottom:30px;border-bottom:1px solid rgba(255,255,255,0.1);}
-.foot-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-fraunces-stack);font-weight:700;font-size:18px;color:#fff;}
-.foot-brand img{height:26px;width:auto;display:block;}
+.foot-brand{display:flex;align-items:center;gap:16px;font-family:var(--font-fraunces-stack);font-weight:700;font-size:20px;color:#fff;}
+.foot-emblem{height:46px;width:auto;display:block;flex:none;background:rgba(255,255,255,0.94);border-radius:10px;padding:6px;}
+.foot-news{height:50px;width:auto;display:block;flex:none;}
 .foot-links{display:flex;gap:26px;flex-wrap:wrap;font-size:13.5px;}
 .foot-bottom{padding-top:24px;font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 
@@ -425,4 +432,11 @@ footer{background:var(--navy-3);color:rgba(255,255,255,0.6);padding:50px 0 30px;
   .syll-grid, .reward-grid{grid-template-columns:1fr;}
   .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
   .wrap{padding:0 22px;}
+  .brand{font-size:18px;gap:10px;}
+  .brand-emblem, header.scrolled .brand-emblem{height:38px;}
+  .brand-news, header.scrolled .brand-news{height:40px;}
+  .brand-divider{display:none;}
+}
+@media (max-width:400px){
+  .brand-news{display:none;}
 }

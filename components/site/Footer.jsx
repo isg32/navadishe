@@ -12,12 +12,9 @@ export default function Footer() {
       <div className="wrap">
         <div className="foot-grid">
           <a href="#top" className="foot-brand">
-            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-              <circle cx="20" cy="20" r="19" stroke="#E0A93A" strokeWidth="1.4" strokeDasharray="1.4 5" fill="none" />
-              <path d="M20 10 L26 24 L20 20 L14 24 Z" fill="#12928F" />
-              <circle cx="18" cy="14" r="4" fill="#fff" />
-            </svg>
-            Nava Dishe
+            <img src="/images/01_NavaDishe_emblem_icon.png" alt="" className="foot-emblem" />
+            <span>Nava Dishe</span>
+            <img src="/images/02_News1st_logo.png" alt="News First" className="foot-news" />
           </a>
           <div className="foot-links">
             {LINKS.map((l) => (

@@ -11,14 +11,6 @@ const NAV_LINKS = [
   { href: '#schools', label: 'Schools' },
 ];
 
-const BrandMark = () => (
-  <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-    <circle cx="20" cy="20" r="19" stroke="#E0A93A" strokeWidth="1.4" strokeDasharray="1.4 5" fill="none" />
-    <path d="M20 10 L26 24 L20 20 L14 24 Z" fill="#0F7A78" />
-    <circle cx="18" cy="14" r="4" fill="#16324A" />
-  </svg>
-);
-
 export default function Masthead() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,8 +27,10 @@ export default function Masthead() {
       <header id="siteHeader" className={scrolled ? 'scrolled' : undefined}>
         <div className="navwrap">
           <a href="#top" className="brand">
-            <BrandMark />
-            Nava&nbsp;<span className="navadishe-tag">Dishe</span>
+            <img src="/images/01_NavaDishe_emblem_icon.png" alt="" className="brand-emblem" />
+            <span className="brand-word">Nava&nbsp;<span className="navadishe-tag">Dishe</span></span>
+            <span className="brand-divider" aria-hidden="true" />
+            <img src="/images/02_News1st_logo.png" alt="News First" className="brand-news" />
           </a>
           <nav className="links">
             {NAV_LINKS.map((link) => (
