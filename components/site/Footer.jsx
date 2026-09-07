@@ -1,39 +1,33 @@
+const LINKS = [
+  { href: '#about', label: 'About' },
+  { href: '#examformat', label: 'The Exam' },
+  { href: '#rewards', label: 'Rewards' },
+  { href: '#schools', label: 'For Schools' },
+  { href: '#partner', label: 'Partner' },
+];
+
 export default function Footer() {
   return (
     <footer>
       <div className="wrap">
-        <div className="foot-top">
-          <div className="foot-brand">
-            <a href="#top" className="nav-brand-link">
-              <img src="/images/01_NavaDishe_emblem_icon.png" alt="" className="brand-logo" />
-              <span className="brand-word brand-word--footer">Nava Dishe</span>
-            </a>
-            <p>Nava Dishe is an annual, free-of-cost scholarship and talent recognition exam by News First, open to Class 10–12 students across Karnataka.</p>
-            <img src="/images/02_News1st_logo.png" alt="News First" className="foot-partner-logo" />
-          </div>
-          <div className="foot-col">
-            <h5>Explore</h5>
-            <a href="#about">About the Exam</a>
-            <a href="#eligibility">Eligibility</a>
-            <a href="#pattern">Exam Pattern</a>
-            <a href="#rewards">Rewards</a>
-          </div>
-          <div className="foot-col">
-            <h5>Programme</h5>
-            <a href="#reach">Our Reach</a>
-            <a href="#partners">Partners</a>
-            <a href="#join">How Schools Join</a>
-          </div>
-          <div className="foot-col">
-            <h5>Partner With Us</h5>
-            <a href="#register">Register Your School</a>
-            <a href="#">Download Info Kit</a>
-            <a href="#">Contact the Bureau</a>
+        <div className="foot-grid">
+          <a href="#top" className="foot-brand">
+            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <circle cx="20" cy="20" r="19" stroke="#E0A93A" strokeWidth="1.4" strokeDasharray="1.4 5" fill="none" />
+              <path d="M20 10 L26 24 L20 20 L14 24 Z" fill="#12928F" />
+              <circle cx="18" cy="14" r="4" fill="#fff" />
+            </svg>
+            Nava Dishe
+          </a>
+          <div className="foot-links">
+            {LINKS.map((l) => (
+              <a href={l.href} key={l.href}>{l.label}</a>
+            ))}
           </div>
         </div>
         <div className="foot-bottom">
-          <span>© 2026 Nava Dishe · A News First Initiative</span>
-          <span>Karnataka State · Class 10–12 · Free to Enter</span>
+          <span>© 2026 Nava Dishe · Presented by News First</span>
+          <span>Karnataka&rsquo;s Annual Mega Scholarship &amp; Talent Recognition Exam</span>
         </div>
       </div>
     </footer>

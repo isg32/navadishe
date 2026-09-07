@@ -1,24 +1,20 @@
+const BADGES = ['Prizes Worth ₹1 Crore', 'Free to Enter', 'Open to Class 10–12', 'Across Karnataka'];
+
 export default function FinalCta() {
   return (
-    <section>
+    <section className="final" id="final">
       <div className="wrap">
-        <div className="final-grid reveal">
-          <div>
-            <div className="eyebrow">The Mission</div>
-            <h2 className="final-headline">Give every<br />student a<br /><span className="accent">fair</span> shot.</h2>
-            <p className="final-copy">Nava Dishe is more than an exam. It is a doorway — to scholarships, to mentors, to a future built on merit, not means.</p>
-            <div className="final-stats">
-              <span>Free to Enter</span>
-              <span>₹1 Crore in Rewards</span>
-              <span>Open to Class 10–12</span>
-            </div>
-            <div className="final-cta-btn">
-              <a href="#register" className="btn btn-primary">Partner With News First</a>
-            </div>
-          </div>
-          <div className="final-photo">
-            <img src="/images/final-cta.jpg" alt="School students in uniform walking together down a tree-lined road" width="700" height="400" />
-          </div>
+        <div className="eyebrow">Give Every Student a Fair Shot</div>
+        <h2>Your Talent. Your Choice.<br />Your Nava Dishe.</h2>
+        <div className="tagline">&ldquo;It is a platform for talent, recognition, opportunity and direction.&rdquo;</div>
+        <div className="badges">
+          {BADGES.map((b) => (
+            <span className="badge" key={b}>{b}</span>
+          ))}
+        </div>
+        <div className="final-ctas">
+          <a href="#register" className="btn btn-gold">Register Your School</a>
+          <a href="#about" className="btn btn-outline-light">Explore Nava Dishe</a>
         </div>
       </div>
     </section>

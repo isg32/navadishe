@@ -2,46 +2,30 @@ export default function Hero() {
   return (
     <section className="hero">
       <div className="wrap">
-        <div className="hero-grid">
-          <div>
-            <div className="eyebrow">Presented by News First</div>
-            <h1 className="hero-headline">
-              <span className="l1">Nava</span><br />
-              <span className="l2">Dishe</span>
-            </h1>
-            <div className="hero-tagline" lang="kn">ನವ ದಿಶೆ <span aria-hidden="true">·</span> <span lang="en">Future Forward</span></div>
-            <div className="hero-sub">Annual Mega-Scholarship &amp; Talent Recognition Exam</div>
-            <p className="hero-quote"><span>&ldquo;</span>A statewide search for Karnataka&rsquo;s brightest minds.<span>&rdquo;</span></p>
-            <div className="hero-ctas">
-              <a href="#register" className="btn btn-primary">Register Your School</a>
-              <a href="#about" className="btn btn-ghost">Explore the Exam</a>
-            </div>
+        <div className="hero-copy">
+          <div className="eyebrow">Presented by News First · Future Forward</div>
+          <h1>
+            Your Talent.<br />
+            Your Choice.<br />
+            <span className="accent">Your Nava Dishe.</span>
+          </h1>
+          <p className="lead">
+            A free, statewide talent recognition examination for Class 10, 11 and 12 students across
+            Karnataka — created to identify talent, celebrate merit and connect students with
+            educational opportunities.
+          </p>
+          <div className="hero-ctas">
+            <a href="#register" className="btn btn-primary">Register Your School</a>
+            <a href="#about" className="btn btn-outline">Explore Nava Dishe</a>
           </div>
-          <div className="hero-visual reveal">
-            <div className="hero-photo-frame">
-              <img src="/images/hero.jpg" alt="Two Karnataka school students in uniform cheering, one holding textbooks" width="800" height="900" />
-              <div className="hero-stamp">Free<br />to<br />Enter</div>
-            </div>
+          <div className="hero-stats">
+            <div className="hero-stat"><div className="num">₹1 Cr</div><div className="lbl">Prizes &amp; Rewards</div></div>
+            <div className="hero-stat"><div className="num">31</div><div className="lbl">Districts Reached</div></div>
+            <div className="hero-stat"><div className="num">₹0</div><div className="lbl">Registration Fee</div></div>
           </div>
         </div>
-
-        <div className="ticket reveal">
-          <div className="ticket-item">
-            <span className="ticket-num">₹1 Cr</span>
-            <span className="ticket-label">Total Rewards Pool</span>
-          </div>
-          <div className="ticket-item">
-            <span className="ticket-num">Karnataka</span>
-            <span className="ticket-label">Statewide Exam</span>
-          </div>
-          <div className="ticket-item">
-            <span className="ticket-num">10–12</span>
-            <span className="ticket-label">Class Eligibility</span>
-          </div>
-          <div className="ticket-item">
-            <span className="ticket-num">₹0</span>
-            <span className="ticket-label">Entry Fee</span>
-          </div>
+        <div className="hero-art">
+          <img src="/images/banner.png" alt="Two Karnataka school students in uniform, cheering" width="480" height="720" />
         </div>
       </div>
     </section>

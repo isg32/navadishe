@@ -1,39 +1,62 @@
+const PILLARS = [
+  {
+    title: 'Free to Enter',
+    copy: 'No registration fee for any student, anywhere in Karnataka.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 3L2 8l10 5 10-5-10-5z" stroke="#0F7A78" strokeWidth="1.6" strokeLinejoin="round" />
+        <path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5" stroke="#0F7A78" strokeWidth="1.6" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Merit-Based',
+    copy: 'Recognition based purely on OMR examination performance.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M9 11l2 2 4-4" stroke="#0F7A78" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="9" stroke="#0F7A78" strokeWidth="1.6" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Statewide Reach',
+    copy: 'A Karnataka-wide initiative reaching students across all 31 districts.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="#0F7A78" strokeWidth="1.6" />
+        <path d="M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9z" stroke="#0F7A78" strokeWidth="1.4" />
+        <path d="M3 12h18" stroke="#0F7A78" strokeWidth="1.4" />
+      </svg>
+    ),
+  },
+];
+
 export default function About() {
   return (
-    <section id="about">
-      <div className="wrap">
-        <div className="section-head reveal">
-          <div>
-            <div className="eyebrow">About the Exam</div>
-            <h2>What is<br />Nava Dishe?</h2>
+    <section className="section" id="about">
+      <div className="wrap about-grid">
+        <div className="reveal">
+          <div className="eyebrow">What is Nava Dishe</div>
+          <h2 style={{ fontSize: 'clamp(26px,3vw,36px)', fontWeight: 600, marginBottom: 22 }}>
+            A New Direction for Karnataka&rsquo;s Young Talent
+          </h2>
+          <div className="about-copy">
+            <p>Nava Dishe is an annual, free-of-cost talent recognition examination for high-school students across all 31 districts of Karnataka.</p>
+            <p>A statewide talent &amp; scholarship movement by <strong style={{ color: 'var(--navy)' }}>News First</strong>, it is built as a competitive benchmarking platform that measures critical thinking, aptitude and general awareness — while removing financial barriers to quality education.</p>
+            <p className="big">&ldquo;It is more than an examination — a platform designed to benchmark talent, recognize merit and help students discover the right direction for their future.&rdquo;</p>
           </div>
-          <p>A talent movement built for every classroom in Karnataka — not just the ones that can afford it.</p>
         </div>
-
-        <div className="about-grid">
-          <div className="about-copy reveal">
-            <p>Nava Dishe is an annual, free-of-cost talent recognition examination for high-school students across all 31 districts of Karnataka. It&rsquo;s built as a competitive benchmarking platform — one that measures critical thinking, aptitude and general awareness, while removing the financial barriers that usually stand between a student and a fair shot.</p>
-            <p>No coaching-class fees. No entry cost. Just a single, well-designed paper that lets ability speak for itself.</p>
-            <div className="chip-row">
-              <div className="chip"><span className="dot" />Free to Enter</div>
-              <div className="chip"><span className="dot" />Merit-Based</div>
-              <div className="chip"><span className="dot" />Statewide Reach</div>
-            </div>
-          </div>
-
-          <div className="reveal">
-            <div className="omr">
-              <div className="omr-head">
-                <span>Nava Dishe · OMR Sheet</span>
-                <span>Roll No. 00042</span>
+        <div className="pillar-list reveal">
+          {PILLARS.map((p) => (
+            <div className="pillar-row" key={p.title}>
+              <div className="icn">{p.icon}</div>
+              <div>
+                <h4>{p.title}</h4>
+                <p>{p.copy}</p>
               </div>
-              <div className="omr-row"><span className="omr-q">01</span><span className="bubble">A</span><span className="bubble fill">B</span><span className="bubble">C</span><span className="bubble">D</span></div>
-              <div className="omr-row"><span className="omr-q">02</span><span className="bubble">A</span><span className="bubble">B</span><span className="bubble">C</span><span className="bubble fill-accent">D</span></div>
-              <div className="omr-row"><span className="omr-q">03</span><span className="bubble fill">A</span><span className="bubble">B</span><span className="bubble">C</span><span className="bubble">D</span></div>
-              <div className="omr-row"><span className="omr-q">04</span><span className="bubble">A</span><span className="bubble fill-accent">B</span><span className="bubble">C</span><span className="bubble">D</span></div>
-              <div className="omr-row"><span className="omr-q">05</span><span className="bubble">A</span><span className="bubble">B</span><span className="bubble fill">C</span><span className="bubble">D</span></div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

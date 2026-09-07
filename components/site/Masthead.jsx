@@ -1,51 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '#about', label: 'About' },
-  { href: '#eligibility', label: 'Eligibility' },
-  { href: '#pattern', label: 'Exam Pattern' },
+  { href: '#examformat', label: 'The Exam' },
   { href: '#rewards', label: 'Rewards' },
-  { href: '#reach', label: 'Reach' },
-  { href: '#partners', label: 'Partners' },
-  { href: '#join', label: 'How to Join' },
+  { href: '#howitworks', label: 'How It Works' },
+  { href: '#schools', label: 'Schools' },
 ];
 
+const BrandMark = () => (
+  <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <circle cx="20" cy="20" r="19" stroke="#E0A93A" strokeWidth="1.4" strokeDasharray="1.4 5" fill="none" />
+    <path d="M20 10 L26 24 L20 20 L14 24 Z" fill="#0F7A78" />
+    <circle cx="18" cy="14" r="4" fill="#16324A" />
+  </svg>
+);
+
 export default function Masthead() {
+  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <>
-      <div className="masthead">
-        <div className="masthead-top">
-          <div className="wrap">
-            <span>Karnataka Edition · 2026</span>
-            <span className="masthead-partner">
-              <img src="/images/02_News1st_logo.png" alt="News First" className="masthead-partner-logo" />
-              A News First Initiative
-            </span>
-          </div>
-        </div>
-        <div className="wrap nav">
-          <div className="nav-brand">
-            <a href="#top" className="nav-brand-link">
-              <img src="/images/01_NavaDishe_emblem_icon.png" alt="" className="brand-logo" />
-              <span className="brand-word">Nava Dishe</span>
-            </a>
-            <span className="brand-divider" aria-hidden="true" />
-            <img src="/images/02_News1st_logo.png" alt="News First" className="brand-partner-logo" />
-          </div>
-          <nav className="nav-links">
+      <header id="siteHeader" className={scrolled ? 'scrolled' : undefined}>
+        <div className="navwrap">
+          <a href="#top" className="brand">
+            <BrandMark />
+            Nava&nbsp;<span className="navadishe-tag">Dishe</span>
+          </a>
+          <nav className="links">
             {NAV_LINKS.map((link) => (
               <a key={link.href} href={link.href}>{link.label}</a>
             ))}
           </nav>
-          <div className="nav-cta">
-            <a href="#register" className="btn btn-primary">Register Your School</a>
+          <div className="navcta">
+            <a href="#register" className="btn btn-outline">Register School</a>
+            <a href="#final" className="btn btn-primary">Explore</a>
             <button
-              className="burger"
+              className="menu-toggle"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
@@ -54,17 +56,13 @@ export default function Masthead() {
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="mobile-menu" style={{ display: menuOpen ? 'block' : 'none' }}>
-        <div className="wrap mobile-menu-list">
-          {NAV_LINKS.map((link) => (
-            <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
-          ))}
-          <a href="#register" className="btn btn-primary mobile-menu-cta" onClick={() => setMenuOpen(false)}>
-            Register Your School
-          </a>
-        </div>
+      <div className={`mobile-nav${menuOpen ? ' open' : ''}`}>
+        {NAV_LINKS.map((link) => (
+          <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
+        ))}
+        <a href="#register" className="btn btn-primary" onClick={() => setMenuOpen(false)}>Register Your School</a>
       </div>
     </>
   );

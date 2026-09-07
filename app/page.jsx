@@ -1,15 +1,17 @@
 import Masthead from '@/components/site/Masthead';
 import ScrollReveal from '@/components/site/ScrollReveal';
 import Hero from '@/components/site/Hero';
+import MarqueeStrip from '@/components/site/MarqueeStrip';
 import About from '@/components/site/About';
 import Eligibility from '@/components/site/Eligibility';
-import ExamPattern from '@/components/site/ExamPattern';
-import Pillars from '@/components/site/Pillars';
-import CroreBanner from '@/components/site/CroreBanner';
+import ExamFormat from '@/components/site/ExamFormat';
+import Syllabus from '@/components/site/Syllabus';
 import Rewards from '@/components/site/Rewards';
+import StudentChoice from '@/components/site/StudentChoice';
+import Pathways from '@/components/site/Pathways';
+import HowItWorks from '@/components/site/HowItWorks';
 import Reach from '@/components/site/Reach';
-import Partners from '@/components/site/Partners';
-import HowToJoin from '@/components/site/HowToJoin';
+import Schools from '@/components/site/Schools';
 import RegisterSection from '@/components/site/RegisterSection';
 import FinalCta from '@/components/site/FinalCta';
 import Footer from '@/components/site/Footer';
@@ -21,15 +23,17 @@ export default function HomePage() {
       <Masthead />
       <main id="top">
         <Hero />
+        <MarqueeStrip />
         <About />
         <Eligibility />
-        <ExamPattern />
-        <Pillars />
-        <CroreBanner />
+        <ExamFormat />
+        <Syllabus />
         <Rewards />
+        <StudentChoice />
+        <Pathways />
+        <HowItWorks />
         <Reach />
-        <Partners />
-        <HowToJoin />
+        <Schools />
         <RegisterSection />
         <FinalCta />
       </main>
