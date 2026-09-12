@@ -255,7 +255,11 @@ nav.links a:hover::after{width:100%;}
   transition:all .3s ease;
 }
 .reward-card:hover{background:rgba(255,255,255,0.09);transform:translateY(-6px);}
-.reward-card .icn{margin:0 auto 18px;}
+.reward-card .icn{margin:0 auto 18px;width:88px;height:88px;}
+.reward-card .icn img{
+  width:88px;height:88px;display:block;
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,0.35));
+}
 .reward-card .rank{font-family:var(--font-mono-stack);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
 .reward-card h4{color:#fff;font-size:15.5px;font-weight:600;margin-bottom:8px;line-height:1.25;}
 .reward-card p{font-size:12.5px;color:rgba(255,255,255,0.65);}
