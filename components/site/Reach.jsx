@@ -18,7 +18,7 @@ export default function Reach() {
             Across Karnataka. For Karnataka&rsquo;s Young Talent.
           </h2>
           <div className="district-badge">
-            <span className="big">31</span>
+            <span className="big">10</span>
             <span className="txt">districts reached across the state</span>
           </div>
           <p>Reaching students across the state, with 10 key cities including:</p>
