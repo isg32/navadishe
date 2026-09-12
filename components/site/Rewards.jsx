@@ -4,7 +4,7 @@ const REWARDS = [
     title: 'E-Bike / Electric Scooter',
     amt: 'Up to ₹1 Lakh',
     copy: 'Supporting mobility, independence and the journey ahead.',
-    img: '/images/reward-ebike.png',
+    img: '/images/reward-ebike.jpg',
     alt: 'Electric scooter',
   },
   {
@@ -12,7 +12,7 @@ const REWARDS = [
     title: 'Laptop',
     amt: 'Up to ₹50,000',
     copy: 'Technology to support learning and future ambitions.',
-    img: '/images/reward-laptop.png',
+    img: '/images/reward-laptop.jpg',
     alt: 'Laptop',
   },
   {
@@ -20,7 +20,7 @@ const REWARDS = [
     title: 'Tablet / Smartphone',
     amt: 'Up to ₹25,000',
     copy: 'Digital access to learning and educational opportunities.',
-    img: '/images/reward-tablet.png',
+    img: '/images/reward-tablet.jpg',
     alt: 'Tablet and smartphone',
   },
   {
@@ -28,7 +28,7 @@ const REWARDS = [
     title: 'Smartwatch + Wireless Earbuds',
     amt: 'Up to ₹11,000',
     copy: 'Recognition for the next stage of the journey.',
-    img: '/images/reward-smartwatch.png',
+    img: '/images/reward-smartwatch.jpg',
     alt: 'Smartwatch',
   },
   {
@@ -36,7 +36,7 @@ const REWARDS = [
     title: 'Premium Wireless Headphones',
     amt: 'Up to ₹5,000',
     copy: 'A reward that carries the focus forward.',
-    img: '/images/reward-headphones.png',
+    img: '/images/reward-headphones.jpg',
     alt: 'Premium wireless headphones',
   },
 ];
@@ -55,11 +55,15 @@ export default function Rewards() {
         <div className="reward-grid reveal">
           {REWARDS.map((r) => (
             <div className="reward-card" key={r.rank}>
-              <div className="icn"><img src={r.img} alt={r.alt} width="88" height="88" loading="lazy" /></div>
-              <div className="rank">{r.rank}</div>
-              <h4>{r.title}</h4>
-              <p>{r.copy}</p>
-              <div className="amt">{r.amt}</div>
+              <div className="reward-media">
+                <img src={r.img} alt={r.alt} loading="lazy" />
+                <span className="reward-pill">{r.rank}</span>
+              </div>
+              <div className="reward-body">
+                <h4>{r.title}</h4>
+                <p>{r.copy}</p>
+                <div className="amt">{r.amt}</div>
+              </div>
             </div>
           ))}
         </div>
