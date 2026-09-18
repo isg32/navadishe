@@ -65,11 +65,11 @@ export default function SummaryPage() {
   return (
     <div>
       <div className="stat-grid-cards">
-        <StatCard icon="schools" tone="ink" value={nf(data.totals.schools)} label={isOwn ? 'Your Schools Onboarded' : 'Total Schools Onboarded'} />
-        <StatCard icon="strength" tone="teal" value={nf(data.totals.strength)} label="Total Strength" />
-        <StatCard icon="participated" tone="gold" value={nf(data.totals.participated)} label="Total Students Participated" />
+        <StatCard image="/images/step1.jpg" value={nf(data.totals.schools)} label={isOwn ? 'Your Schools Onboarded' : 'Total Schools Onboarded'} />
+        <StatCard image="/images/eligibility.jpg" value={nf(data.totals.strength)} label="Total Strength" />
+        <StatCard image="/images/step2.jpg" value={nf(data.totals.participated)} label="Total Students Participated" />
         {!isOwn && (
-          <StatCard icon="districts" tone="rose" value={nf(data.totals.districts)} label="Districts Covered" />
+          <StatCard image="/images/reach.jpg" value={nf(data.totals.districts)} label="Districts Covered" />
         )}
       </div>
 

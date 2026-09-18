@@ -1,24 +1,15 @@
-import { FileText, Globe, Phone, MapPin, School, Users, GraduationCap } from 'lucide-react';
-
-const ICONS = {
-  registrations: FileText,
-  leads: Globe,
-  callback: Phone,
-  districts: MapPin,
-  schools: School,
-  strength: Users,
-  participated: GraduationCap,
-};
-
-export default function StatCard({ icon, tone, value, label }) {
-  const Icon = ICONS[icon];
+export default function StatCard({ image, value, label }) {
   return (
     <div className="stat-card">
-      <div className={`stat-card-icon ${tone}`}>
-        <Icon size={19} strokeWidth={1.8} />
+      <img className="stat-card-bg" src={image} alt="" aria-hidden="true" />
+      <div className="stat-card-scrim" />
+      <div className="stat-card-content">
+        <span className="stat-card-label">
+          <span className="stat-card-dot" />
+          {label}
+        </span>
+        <span className="stat-card-value">{value}</span>
       </div>
-      <div className="stat-card-value">{value}</div>
-      <div className="stat-card-label">{label}</div>
     </div>
   );
 }
