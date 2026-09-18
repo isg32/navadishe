@@ -8,8 +8,8 @@ import { ROLE_NAV } from '@/lib/auth';
 import { SessionProvider, useSession } from '@/components/dashboard/SessionContext';
 
 const NAV_ITEMS = [
-  { key: 'home', href: '/dashboard', label: 'Summary', Icon: Home },
-  { key: 'form', href: '/dashboard/new', label: 'New Registration', Icon: FilePlus2 },
+  { key: 'home', href: '/dashboard', label: 'Home', Icon: Home },
+  { key: 'form', href: '/dashboard/new', label: 'Add a School', Icon: FilePlus2 },
   { key: 'registrations', href: '/dashboard/registrations', label: 'Registrations', Icon: ClipboardList },
   { key: 'leads', href: '/dashboard/leads', label: 'From Website', Icon: Globe },
   { key: 'users', href: '/dashboard/users', label: 'Users', Icon: Users },
@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 ];
 
 const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map((i) => [i.href, i.label]));
-PAGE_TITLES['/dashboard'] = 'Summary';
+PAGE_TITLES['/dashboard'] = 'Home';
 
 function Shell({ children }) {
   const { user, loading, logout } = useSession();
