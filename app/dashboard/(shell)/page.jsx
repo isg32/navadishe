@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import StatCard from '@/components/dashboard/StatCard';
 import MiniTable from '@/components/dashboard/MiniTable';
+import ActivityChart from '@/components/dashboard/ActivityChart';
 import { formatDate } from '@/lib/format';
 
 const nf = (n) => Number(n || 0).toLocaleString('en-IN');
@@ -65,12 +66,17 @@ export default function SummaryPage() {
   return (
     <div>
       <div className="stat-grid-cards">
-        <StatCard image="/images/step1.jpg" value={nf(data.totals.schools)} label={isOwn ? 'Your Schools Onboarded' : 'Total Schools Onboarded'} />
-        <StatCard image="/images/eligibility.jpg" value={nf(data.totals.strength)} label="Total Strength" />
-        <StatCard image="/images/step2.jpg" value={nf(data.totals.participated)} label="Total Students Participated" />
+        <StatCard icon="schools" variant="1" value={nf(data.totals.schools)} label={isOwn ? 'Your Schools Onboarded' : 'Total Schools Onboarded'} />
+        <StatCard icon="strength" variant="2" value={nf(data.totals.strength)} label="Total Strength" />
+        <StatCard icon="participated" variant="3" value={nf(data.totals.participated)} label="Total Students Participated" />
         {!isOwn && (
-          <StatCard image="/images/reach.jpg" value={nf(data.totals.districts)} label="Districts Covered" />
+          <StatCard icon="districts" variant="4" value={nf(data.totals.districts)} label="Districts Covered" />
         )}
+      </div>
+
+      <div className="analytics-panel" style={{ marginBottom: 20 }}>
+        <h3>{isOwn ? 'Your Registration Activity' : 'Registration Activity'}</h3>
+        <ActivityChart data={data.dailyActivity} valueKey="registrations" unitLabel="registrations" />
       </div>
 
       <div className="analytics-grid">

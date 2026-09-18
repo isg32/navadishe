@@ -1,15 +1,20 @@
 /* Dashboard design tokens — self-contained so the dashboard keeps its own
-   look regardless of the public site's theme (globals.css). */
+   look regardless of the public site's theme (globals.css).
+   Palette: warm rose/peach premium tones (no navy/blue). */
 .dashboard-body{
   --paper:#FFFFFF;
-  --paper-deep:#EFF4F3;
-  --ink:#11244C;
-  --ink-soft:#4B5A6E;
-  --line:rgba(17,36,76,0.14);
-  --primary:#256B74;
-  --primary-deep:#153F46;
+  --paper-deep:#FBF1EE;
+  --ink:#3A2432;
+  --ink-soft:#8C6B73;
+  --line:rgba(58,36,50,0.14);
+  --primary:#B8546A;
+  --primary-deep:#7C3346;
   --marigold:#D19323;
   --marigold-deep:#8C6318;
+  --rose-1:#E7A796;
+  --rose-2:#D9788A;
+  --rose-3:#C15B72;
+  --rose-4:#94395A;
   --font-plus-jakarta: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
@@ -85,7 +90,7 @@
 .login-card .field input:focus{
   outline:none;
   border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(37,107,116,0.15);
+  box-shadow:0 0 0 3px rgba(184,84,106,0.18);
 }
 .login-btn{
   width:100%;
@@ -167,7 +172,7 @@
 .sidebar-scrim{
   position:fixed;
   inset:0;
-  background:rgba(11,28,48,0.55);
+  background:rgba(58,36,50,0.55);
   z-index:55;
 }
 
@@ -246,10 +251,10 @@
 }
 
 /* ===== Analytics / Summary stat cards =====
-   Full-bleed photo background, opaque-to-transparent scrim behind the
-   text so it stays readable over any photo. Label + value are
-   stacked and left-aligned in the top-left of the card, photo visible
-   filling the rest. */
+   Solid rose/peach gradient (each card a different shade of the same
+   family) with a subtle grain texture over it, and a white leading
+   icon above the label+value — no photos, no blue. Everything is
+   anchored top-left, stacked, left-aligned. */
 .stat-grid-cards{
   display:grid;
   grid-template-columns:repeat(2, 1fr);
@@ -262,31 +267,24 @@
   border-radius:14px;
   overflow:hidden;
   min-height:148px;
-  border:1px solid var(--line);
 }
-.stat-card-bg{
+.stat-card--1{background:linear-gradient(135deg, var(--rose-1) 0%, var(--rose-2) 100%);}
+.stat-card--2{background:linear-gradient(135deg, var(--rose-2) 0%, var(--rose-3) 100%);}
+.stat-card--3{background:linear-gradient(135deg, var(--rose-1) 0%, var(--rose-3) 100%);}
+.stat-card--4{background:linear-gradient(135deg, var(--rose-3) 0%, var(--rose-4) 100%);}
+.stat-card-grain{
   position:absolute;
   inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
   z-index:0;
-  transition:transform .5s ease;
-}
-.stat-card:hover .stat-card-bg{transform:scale(1.05);}
-.stat-card-scrim{
-  position:absolute;
-  inset:0;
-  z-index:1;
-  background:linear-gradient(90deg,
-    rgba(11,22,44,0.94) 0%,
-    rgba(11,22,44,0.86) 42%,
-    rgba(11,22,44,0.35) 78%,
-    rgba(11,22,44,0.08) 100%);
+  opacity:0.5;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:140px 140px;
+  pointer-events:none;
 }
 .stat-card-content{
   position:relative;
-  z-index:2;
+  z-index:1;
   height:100%;
   display:flex;
   flex-direction:column;
@@ -294,29 +292,29 @@
   justify-content:flex-start;
   padding:20px 22px;
 }
-.stat-card-label{
+.stat-card-icon{
   display:flex;
-  align-items:center;
-  gap:9px;
+  color:#fff;
+  opacity:0.95;
+  margin-bottom:16px;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,0.18));
+}
+.stat-card-icon svg{width:22px;height:22px;}
+.stat-card-label{
+  display:block;
   width:100%;
   font-family:var(--font-inter), sans-serif;
   font-size:12.5px;
   font-weight:700;
   text-transform:uppercase;
   letter-spacing:0.045em;
-  color:rgba(255,255,255,0.88);
+  color:rgba(255,255,255,0.92);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
-.stat-card-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--marigold);
-  flex:none;
-  box-shadow:0 0 0 3px rgba(209,147,35,0.28);
-}
 .stat-card-value{
-  margin-top:10px;
+  margin-top:8px;
   font-family:var(--font-plus-jakarta), sans-serif;
   font-weight:800;
   font-size:28px;
@@ -350,6 +348,61 @@
   color:var(--ink);
   margin-bottom:14px;
 }
+
+/* ===== Activity chart (14-day registrations trend) ===== */
+.activity-chart-head{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+.activity-chart-total{
+  font-family:var(--font-plus-jakarta), sans-serif;
+  font-weight:800;
+  font-size:26px;
+  color:var(--ink);
+  line-height:1;
+}
+.activity-chart-sub{
+  font-family:var(--font-inter), sans-serif;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  color:var(--ink-soft);
+}
+.activity-chart-bars{
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+  height:120px;
+}
+.activity-bar-col{
+  flex:1;
+  min-width:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+.activity-bar{
+  width:100%;
+  max-width:28px;
+  min-height:4px;
+  border-radius:4px 4px 2px 2px;
+  background:linear-gradient(180deg, var(--rose-2) 0%, var(--primary-deep) 100%);
+  transition:height .35s ease;
+}
+.activity-bar-label{
+  font-family:var(--font-inter), sans-serif;
+  font-size:10px;
+  color:var(--ink-soft);
+  white-space:nowrap;
+}
+
 .mini-table{width:100%;border-collapse:collapse;}
 .mini-table th{
   text-align:left;
@@ -400,7 +453,7 @@
 .table-search:focus{
   outline:none;
   border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(37,107,116,0.15);
+  box-shadow:0 0 0 3px rgba(184,84,106,0.18);
 }
 .table-filter{
   min-height:44px;
@@ -483,12 +536,12 @@
   font-size:12px;
   font-weight:600;
 }
-.badge-website{background:#E4EEEF;color:var(--primary-deep);}
+.badge-website{background:#F8E6EA;color:var(--primary-deep);}
 .badge-dashboard{background:#F7E9D2;color:var(--marigold-deep);}
 .badge-yes{background:#E7F5EE;color:#1E6B45;}
 .badge-no{background:var(--paper-deep);color:var(--ink-soft);}
 .badge-admin{background:#F7E9D2;color:var(--marigold-deep);}
-.badge-poc{background:#E4EEEF;color:var(--primary-deep);}
+.badge-poc{background:#F8E6EA;color:var(--primary-deep);}
 .badge-reader{background:var(--paper-deep);color:var(--ink-soft);}
 
 /* ===== Users page ===== */
@@ -541,7 +594,7 @@
 .detail-overlay{
   position:fixed;
   inset:0;
-  background:rgba(11,28,48,0.5);
+  background:rgba(58,36,50,0.5);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -629,7 +682,7 @@
 .dash-table td.row-actions{
   position:sticky;right:0;
   background:var(--paper);
-  box-shadow:-8px 0 8px -8px rgba(17,36,76,0.18);
+  box-shadow:-8px 0 8px -8px rgba(58,36,50,0.18);
 }
 .dash-table thead th.col-actions{z-index:2;cursor:default;}
 .dash-table tbody tr:hover td.row-actions{background:var(--paper-deep);}
@@ -655,7 +708,7 @@
 .detail-edit-field textarea{min-height:70px;resize:vertical;}
 .detail-edit-field:has(textarea){grid-column:1 / -1;}
 .detail-edit-field input:focus,
-.detail-edit-field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,107,116,0.15);}
+.detail-edit-field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(184,84,106,0.18);}
 
 /* ===== New Registration form (self-contained — no longer inherits the
    public site's globals.css form styles) ===== */
@@ -698,7 +751,7 @@
   -webkit-appearance:none;
   -moz-appearance:none;
   appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234B5A6E' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C6B73' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;
   background-position:right 12px center;
   cursor:pointer;
@@ -709,7 +762,7 @@
 .dashboard-body .register-form .field textarea:focus{
   outline:none;
   border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(37,107,116,0.15);
+  box-shadow:0 0 0 3px rgba(184,84,106,0.18);
 }
 .dashboard-body .register-form .field input.field-locked,
 .dashboard-body .register-form .field select:disabled{
@@ -776,6 +829,8 @@
   .stat-grid-cards{grid-template-columns:1fr;}
   .stat-card{min-height:128px;}
   .stat-card-content{padding:18px;}
+  .stat-card-icon{margin-bottom:12px;}
+  .stat-card-icon svg{width:20px;height:20px;}
   .stat-card-label{font-size:11.5px;}
   .stat-card-value{font-size:26px;margin-top:8px;}
   .user-form{grid-template-columns:1fr;}
