@@ -247,9 +247,9 @@
 
 /* ===== Analytics / Summary stat cards =====
    Full-bleed photo background, opaque-to-transparent scrim behind the
-   label+value so the text stays readable over any photo. Wider (2-up)
-   than the old 4-up icon cards since label and value now share one
-   row instead of stacking. */
+   text so it stays readable over any photo. Label + value are
+   stacked and left-aligned in the top-left of the card, photo visible
+   filling the rest. */
 .stat-grid-cards{
   display:grid;
   grid-template-columns:repeat(2, 1fr);
@@ -261,7 +261,7 @@
   isolation:isolate;
   border-radius:14px;
   overflow:hidden;
-  min-height:104px;
+  min-height:148px;
   border:1px solid var(--line);
 }
 .stat-card-bg{
@@ -289,15 +289,16 @@
   z-index:2;
   height:100%;
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  padding:0 22px;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding:20px 22px;
 }
 .stat-card-label{
   display:flex;
   align-items:center;
   gap:9px;
+  width:100%;
   font-family:var(--font-inter), sans-serif;
   font-size:12.5px;
   font-weight:700;
@@ -315,12 +316,13 @@
   box-shadow:0 0 0 3px rgba(209,147,35,0.28);
 }
 .stat-card-value{
+  margin-top:10px;
   font-family:var(--font-plus-jakarta), sans-serif;
   font-weight:800;
   font-size:28px;
   line-height:1;
   color:#fff;
-  flex:none;
+  text-align:left;
   white-space:nowrap;
 }
 .analytics-section-title{
@@ -772,10 +774,10 @@
   .dash-content{padding:22px 18px 60px;}
   .dash-user{display:none;}
   .stat-grid-cards{grid-template-columns:1fr;}
-  .stat-card{min-height:88px;}
-  .stat-card-content{padding:0 18px;gap:10px;}
+  .stat-card{min-height:128px;}
+  .stat-card-content{padding:18px;}
   .stat-card-label{font-size:11.5px;}
-  .stat-card-value{font-size:24px;}
+  .stat-card-value{font-size:26px;margin-top:8px;}
   .user-form{grid-template-columns:1fr;}
   .detail-edit-grid{grid-template-columns:1fr;}
   .dashboard-body .register-form{grid-template-columns:1fr;}
