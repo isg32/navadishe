@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import MiniTable from '@/components/dashboard/MiniTable';
-import ActivityChart from '@/components/dashboard/ActivityChart';
+import MetricChart from '@/components/dashboard/MetricChart';
 import { formatDate } from '@/lib/format';
 
 const nf = (n) => Number(n || 0).toLocaleString('en-IN');
@@ -44,6 +45,7 @@ function TodayTable({ today }) {
 export default function SummaryPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [metricPage, setMetricPage] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,6 +65,35 @@ export default function SummaryPage() {
 
   const isOwn = data.scope === 'own';
 
+  const metricPages = [
+    {
+      key: 'class',
+      title: 'Strength by Class',
+      unit: 'students',
+      data: [
+        { label: 'Class 1–9', value: data.classBreakdown.c1_9 },
+        { label: 'Class 10', value: data.classBreakdown.c10 },
+        { label: 'Class 11', value: data.classBreakdown.c11 },
+        { label: 'Class 12', value: data.classBreakdown.c12 },
+      ],
+    },
+    ...(!isOwn ? [
+      {
+        key: 'board',
+        title: 'Registrations by Board',
+        unit: 'schools',
+        data: data.boardBreakdown.map((b) => ({ label: b.board, value: b.count })),
+      },
+      {
+        key: 'district',
+        title: 'Registrations by District',
+        unit: 'schools',
+        data: data.districtBreakdown.map((d) => ({ label: d.district, value: d.count })),
+      },
+    ] : []),
+  ];
+  const activeMetric = metricPages[metricPage % metricPages.length];
+
   return (
     <div>
       <div className="stat-grid-cards">
@@ -75,8 +106,21 @@ export default function SummaryPage() {
       </div>
 
       <div className="analytics-panel" style={{ marginBottom: 20 }}>
-        <h3>{isOwn ? 'Your Registration Activity' : 'Registration Activity'}</h3>
-        <ActivityChart data={data.dailyActivity} valueKey="registrations" unitLabel="registrations" />
+        <div className="metrics-panel-head">
+          <h3>{activeMetric.title}</h3>
+          {metricPages.length > 1 && (
+            <button
+              type="button"
+              className="metrics-next-btn"
+              onClick={() => setMetricPage((p) => (p + 1) % metricPages.length)}
+              aria-label="Show next metric"
+              title="Show next metric"
+            >
+              <ChevronRight size={17} strokeWidth={2.2} />
+            </button>
+          )}
+        </div>
+        <MetricChart data={activeMetric.data} unitLabel={activeMetric.unit} />
       </div>
 
       <div className="analytics-grid">
