@@ -67,6 +67,15 @@ export default function SummaryPage() {
 
   const metricPages = [
     {
+      key: 'activity',
+      title: isOwn ? 'Your Registration Activity' : 'Registration Activity',
+      unit: 'registrations',
+      data: data.dailyActivity.map((d) => ({
+        label: new Date(`${d.date}T00:00:00Z`).toLocaleDateString('en-IN', { day: '2-digit', timeZone: 'UTC' }),
+        value: d.registrations,
+      })),
+    },
+    {
       key: 'class',
       title: 'Strength by Class',
       unit: 'students',
